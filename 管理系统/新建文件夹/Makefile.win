@@ -1,4 +1,4 @@
-# Project: 测试
+# Project: 学生管理系统
 # Makefile created by Dev-C++ 5.15
 
 CPP      = g++.exe -D__DEBUG__
@@ -9,7 +9,7 @@ LINKOBJ  = main.o student.o
 LIBS     = -L"D:/Dev-Cpp（5.16）/TDM-GCC-64/x86_64-w64-mingw32/lib32" -static-libgcc -m32 -g3
 INCS     = -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/include" -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
 CXXINCS  = -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/include" -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"D:/Dev-Cpp（5.16）/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
-BIN      = 学管2.0.exe
+BIN      = 学生管理系统.exe
 CXXFLAGS = $(CXXINCS) -Og -m32 -std=gnu++11 -g3
 CFLAGS   = $(INCS) -Og -m32 -std=gnu++11 -g3
 RM       = del /q
@@ -24,8 +24,8 @@ clean: clean-custom
 $(BIN): $(OBJ)
 	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-main.o: main.cpp
-	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+main.o: main.c
+	$(CPP) -c main.c -o main.o $(CXXFLAGS)
 
-student.o: student.cpp
-	$(CPP) -c student.cpp -o student.o $(CXXFLAGS)
+student.o: student.c
+	$(CPP) -c student.c -o student.o $(CXXFLAGS)

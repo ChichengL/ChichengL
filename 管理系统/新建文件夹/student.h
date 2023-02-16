@@ -11,22 +11,10 @@ typedef struct Student {
 	int grade;
 } Student;
 
-typedef struct guanli {
-	char zh[100];
-	char mm[100];
-	struct guanli *next;
-} GL;
-
 typedef struct Node {
 	Student stu;
 	struct Node *next;
 } Node;
-void denglu(int &x);
-void duru();
-void xuanze(int &x);
-void menu1();
-void Create();
-void zhuce();
 void Loop();
 void menu();
 void CreatNode();
