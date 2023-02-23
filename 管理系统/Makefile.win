@@ -6,12 +6,12 @@ CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
 OBJ      = main.o student.o
 LINKOBJ  = main.o student.o
-LIBS     = -L"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/x86_64-w64-mingw32/lib32" -static-libgcc -m32 -g3
+LIBS     = -L"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/x86_64-w64-mingw32/lib32" -static-libgcc -g3
 INCS     = -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/include" -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
 CXXINCS  = -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/include" -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"D:/Dev-Cpp£¨5.16£©/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
 BIN      = Ñ§¹Ü2.0.exe
-CXXFLAGS = $(CXXINCS) -Og -m32 -std=gnu++11 -g3
-CFLAGS   = $(INCS) -Og -m32 -std=gnu++11 -g3
+CXXFLAGS = $(CXXINCS) -Werror -g3
+CFLAGS   = $(INCS) -Werror -g3
 RM       = del /q
 
 .PHONY: all all-before all-after clean clean-custom

@@ -4,16 +4,16 @@
 using namespace std;
 
 typedef struct Student {
-	int xuehao;
-	char name[20];
-	char sex[4];
+	long long xuehao;
+	char name[2000];
+	char sex[400];
 	int age;
 	int grade;
 } Student;
 
 typedef struct guanli {
-	char zh[100];
-	char mm[100];
+	char zh[1000];
+	char mm[1000];
 	struct guanli *next;
 } GL;
 

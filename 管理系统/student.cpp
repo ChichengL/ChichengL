@@ -38,7 +38,7 @@ void Create() {
 
 void denglu(int &x) {
 	duru();
-	char a[100], b[100];
+	char a[1000], b[1000];
 	printf("请输入账号和密码\n");
 	cin >> a >> b;
 	if (head1->next == NULL) {
@@ -62,24 +62,35 @@ void denglu(int &x) {
 }
 
 void zhuce() {
+	duru();
 	string anhao;
 	printf("请输入暗号\n");
 	cin >> anhao;
-	if (anhao == "lec666") {
+	if (anhao == "lec") {
 		printf("请输入创建的账号和密码\n");
-		char a[100], b[100];
+		char a[1000], b[1000];
 		cin >> a >> b;
-		GL *p = (GL *)malloc(sizeof(GL));
-		strcpy(p->zh, a);
-		strcpy(p->mm, b);
-		p->next = NULL;
-		if (head1->next == NULL) {
-			head1->next = p;
-		} else {
-			p->next = head1->next;
-			head1->next = p;
+		GL *p = head1->next;
+		while (p != NULL && !strcpy(p->zh, a)) {
+			p = p->next;
 		}
-	}
+		if (p) {
+			printf("该账号已存在\n");
+		} else {
+			GL *q = (GL *)malloc(sizeof(GL));
+			strcpy(q->zh, a);
+			strcpy(q->mm, b);
+			q->next = NULL;
+			if (head1->next == NULL) {
+				head1->next = q;
+			} else {
+				q->next = head1->next;
+				head1->next = q;
+			}
+		}
+
+	} else
+		printf("暗号错误\n");
 	GL *p = head1->next;
 	if ((fp = fopen("zh", "a+")) == NULL) {
 		printf("\n文件保存失败！不能获得文件句柄！\n");
@@ -129,7 +140,7 @@ void duru() {
 void Loop() {
 	CreatNode();
 	while (1) {
-		// 清除输出
+		system("cls");// 清除输出
 		menu();
 		printf("请输入数字：");
 		char ch = getchar();
@@ -205,13 +216,13 @@ void Input() {
 	printf("\n");
 	printf("请输入学生姓名：");
 	scanf("%s", p->stu.name);
-	printf("请输入学生学号：");
-	scanf("%d", &p->stu.xuehao);
+	printf("请输入学生学号：(请输入数字)");
+	scanf("%lld", &p->stu.xuehao);
 	printf("请输入学生性别：");
 	scanf("%s", p->stu.sex);
-	printf("请输入学生年龄：");
+	printf("请输入学生年龄：(请输入数字)");
 	scanf("%d", &p->stu.age);
-	printf("请输入学生成绩：");
+	printf("请输入学生成绩：(请输入数字)");
 	scanf("%d", &p->stu.grade);
 	if (head->next == NULL) {
 		head->next = p;
@@ -228,7 +239,7 @@ void Print() {
 	printf("---------------------------------------------------------------------------------\n");
 	Node *p = head->next;
 	while (p != NULL) {
-		printf("|\t%d\t|\t%s\t|\t%s\t|\t%d\t|\t%d\t|\n", p->stu.xuehao, p->stu.name, p->stu.sex, p->stu.age, p->stu.grade);
+		printf("|\t%lld\t|\t%s\t|\t%s\t|\t%d\t|\t%d\t|\n", p->stu.xuehao, p->stu.name, p->stu.sex, p->stu.age, p->stu.grade);
 		printf("---------------------------------------------------------------------------------\n");
 		p = p->next;
 	}
@@ -250,7 +261,7 @@ void SaveData() {
 		return;
 	}
 	while (p != NULL) {
-		fprintf(fp, "%s %d %s %d %d\n", p->stu.name, p->stu.xuehao, p->stu.sex, p->stu.age, p->stu.grade);
+		fprintf(fp, "%s %lld %s %d %d\n", p->stu.name, p->stu.xuehao, p->stu.sex, p->stu.age, p->stu.grade);
 		p = p->next;
 	}
 	fclose(fp);
@@ -272,7 +283,7 @@ void LoadData() {
 	while (1) {
 		Node *p = (Node *)malloc(sizeof(Node));
 		p->next = NULL;
-		if (fscanf(fp, "%s %d %s %d %d\n", p->stu.name, &p->stu.xuehao, p->stu.sex, &p->stu.age, &p->stu.grade) == EOF) {
+		if (fscanf(fp, "%s %lld %s %d %d\n", p->stu.name, &p->stu.xuehao, p->stu.sex, &p->stu.age, &p->stu.grade) == EOF) {
 			//读取至文本末尾
 			break;
 		}
@@ -322,6 +333,7 @@ void Search() {
 			}
 			if (!flag) {
 				printf("\t\t\t\t未查询到该生信息！\t\t\t\t\t");
+				system("pause");
 				return;
 			}
 		} else if (k == 2) {
@@ -351,15 +363,15 @@ void Search() {
 
 void xiugai() {
 	printf("请输入需要修改人员的学号:");
-	int num;
-	scanf("%d", &num);
+	long long num;
+	scanf("%lld", &num);
 	Node *p = head->next;
 	while (p && p->stu.xuehao != num) {
 		p = p->next;
 	}
 	if (p) {
 		printf("请输入更改后的学生学号：");
-		scanf("%d", &p->stu.xuehao);
+		scanf("%lld", &p->stu.xuehao);
 		printf("请输入更改后的学生姓名：");
 		scanf("%s", p->stu.name);
 		printf("请输入更改后的学生性别：");
@@ -376,8 +388,8 @@ void xiugai() {
 void Delete() {
 	Node *p = head->next, *q = head;
 	printf("请输入需要删除学生的学号");
-	int n;
-	scanf("%d", &n);
+	long long n;
+	scanf("%lld", &n);
 	while (p && p->stu.xuehao != n) {
 		q = p;
 		p = p->next;
