@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body{
+      background-color: #ccc;
+    }
+    div{
+      width: 200px;
+      height: 100px;
+      background: url(练习图片/bear.png) no-repeat;
+      /* 元素可以加多个动画只要用逗号分割 */
+      animation: move 3s forwards, bear 0.5s steps(8) infinite;
+      /* 分步来做 */
+    }
+    @keyframes bear {
+      0%{
+        background-position:0 0;
+      }
+      100%{
+        background-position:-1600px 0;
+      }
+    }
+    @keyframes move {
+      0%{
+        left:0;
+      }
+      100%{
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div></div>
+</body>
+</html>

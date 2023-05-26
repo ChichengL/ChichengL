@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Az</title>
+  <style>
+    .title {
+      text-align: center;
+    }
+
+    .ps {
+      float: right;
+    }
+
+    .body {
+      position: relative;
+      width: 1000px;
+      /* height: 1000px; */
+      margin: 100px auto;
+      /* background-color: pink; */
+    }
+
+    .body .novel {
+      text-align: center;
+      font-size: 20px;
+    }
+
+    .body ul li {
+      margin: 12px;
+    }
+
+    .body .list {
+      width: 150px;
+      margin: 0 auto;
+    }
+
+    li {
+      list-style: none;
+    }
+
+    a {
+      text-decoration: none;
+      color: black;
+      font-weight: 700;
+    }
+
+    a:hover {
+      color: orange;
+    }
+
+    img:hover {
+      transform: scale(1.1);
+    }
+
+    .body .t1,
+    .t2,
+    .t3,
+    .t4 {
+      overflow: hidden;
+      float: left;
+      width: 200px;
+      height: 400px;
+      background-color: #fff;
+      margin: 40px 20px;
+
+    }
+    .body img {
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .clear {
+      clear: both;
+    }
+
+    .tail {
+      float: right;
+      margin-bottom: 20px;
+    }
+
+    .t1 .intro1,
+    .t2 .intro2,
+    .t3 .intro3,
+    .t4 .intro4 {
+      padding: 0 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+
+    .btn {
+      position: fixed;
+      top: 300px;
+      left: 100px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: orange;
+      cursor: pointer;
+    }
+
+    body,
+    img {
+      transition: all .4s;
+    }
+
+    .time {
+      position: fixed;
+      top: 10%;
+      left: 10%;
+      color: red;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .cube {
+      position:absolute;
+      top:-770px;
+      left:50px;
+      width: 100px;
+      height: 100px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: all .8s ease-in-out;
+    }
+    .cube .side {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: 1px solid #000;
+    }
+
+    .front {
+      background-color: orange;
+      transform: translateZ(50px);
+    }
+
+    .back {
+      /* z-index: 1; */
+      background-color: yellow;
+      transform: translateZ(-50px) rotateY(180deg);
+    }
+
+    .top {
+      background-color: red;
+      transform: translateY(-50px) rotateX(-90deg) ;
+    }
+
+    .bottom {
+      background-color: blue;
+      transform: translateY(50px) rotateX(90deg);
+    }
+
+    .left {
+      background-color: green;
+      transform:translateX(-50px) rotateY(-90deg);
+    }
+    .right {
+      background-color: #fff;
+      transform:translateX(50px) rotateY(90deg) ;
+    }
+  </style>
+</head>
+
+<body onload="Time()" onloadstart="remind()">
+
+  <div class="title">
+    <h1>欢迎来到这个网站</h1>
+    <div class="ps">——不好看</div>
+  </div>
+  <button class="btn" onclick="myfunction"></button>
+  <div class="body">
+    <div>
+      <h4 class="novel">小说推荐</h4>
+      <ul class="list">
+        <li><a href="https://book.qidian.com/info/1012584111/" target="_blank">神秘复苏</li>
+        <li><a href="https://book.qidian.com/info/1012284323/" target="_blank">我有一座冒险屋</a></li>
+        <li> <a href="https://book.qidian.com/info/1031794030/" target="_blank">道诡异仙</a></li>
+        <li><a href="https://book.qidian.com/info/1025901449/" target="_blank">我的治愈系游戏</a></li>
+      </ul>
+    </div>
+    <div class="t1">
+      <div class="link1"><a href="https://book.qidian.com/info/1012584111/" target="_blank"><img
+            src="https://bookcover.yuewen.com/qdbimg/349573/1012584111/180.webp" alt="神秘复苏">
+        </a></div>
+      <div class="intro1">
+        <p><b>简介</b></p>
+        <p>&nbsp;&nbsp;“我叫杨间，当你看到这句话的时候我已经死了......”<br>
+          一张诡异的羊皮卷，一只窥视黑暗的眼睛，这是一个活下来的人经历的故事。</p>
+      </div>
+    </div>
+    <div class="t2">
+      <div class="link2">
+        <a href="https://book.qidian.com/info/1012284323/" target="_blank"><img
+            src="https://bookcover.yuewen.com/qdbimg/349573/1012284323/180.webp" alt=""></a>
+      </div>
+      <div class="intro2">
+        <p><b>简介</b></p>
+        <p>
+          &nbsp;&nbsp;陈歌继承了失踪父母留下的冒险屋，无奈生意萧条，直到整理冒险屋时意外发现的手机改变了这一切。<br>只要完成手机每日布置的不同难度的任务，冒险屋就能得到修缮甚至扩建！<br>于是陈歌开始在各大禁地里探险取材，将其中场景元素纳入到自己的冒险屋中。随着前来参观的游客们各种惊声尖叫，冒险屋一举成名！然而虽然任务带来的好处越来越多，但其中隐患也慢慢显现，甚至父母失踪的线索似乎也藏其中……
+        </p>
+      </div>
+    </div>
+    <div class="t3">
+      <div class="link3">
+        <a href="https://book.qidian.com/info/1031794030/" target="_blank"><img
+            src="https://bookcover.yuewen.com/qdbimg/349573/1031794030/150.webp" alt=""></a>
+      </div>
+      <div class="intro3">
+        <p><b>简介</b></p>
+        <p>&nbsp;&nbsp;诡异的天道，异常的仙佛，是真？是假？ 陷入迷惘的李火旺无法分辨。<br> 可让他无法分辨的不仅仅只是这些。还有他自己，他病了，病的很重。</p>
+      </div>
+    </div>
+    <div class="t4">
+      <div class="link4">
+        <a href="https://book.qidian.com/info/1025901449/" target="_blank"><img
+            src="https://bookcover.yuewen.com/qdbimg/349573/1025901449/150.webp" alt=""></a>
+      </div>
+      <div class="intro4">
+        <p><b>简介</b></p>
+        <p>&nbsp;&nbsp;警察同志，如果我说这是一款休闲治愈系游戏，你们信吗？</p>
+      </div>
+    </div>
+    <div class="clear"></div>
+  </div>
+  <div class="cube">
+    <div class="side front"></div>
+    <div class="side back"></div>
+    <div class="side top"></div>
+    <div class="side bottom"></div>
+    <div class="side left"></div>
+    <div class="side right"></div>
+  </div>
+  <div class="tail">
+    感觉写的很丑az
+  </div>
+  <p id="time" class="time"></p>
+</body>
+
+</html>
+<script>
+  function remind () {
+    let time = new Date();
+    let h = time.getHours();
+    if (h >= 23 || h <= 4) {
+      alter("时间已经很晚啦，注意休息哟");
+    }
+  }
+  let button = document.querySelector("button");
+  button.onclick = function () {
+    let red = Math.floor(Math.random() * 256);
+    let green = Math.floor(Math.random() * 256);
+    let blue = Math.floor(Math.random() * 256);
+    let color = "rgb(" + red + ", " + green + ", " + blue + ")";
+    // 设置页面背景颜色为随机颜色
+    document.body.style.backgroundColor = color;
+  }
+  function Time () {
+    let td = new Date();
+    let h = td.getHours();
+    let m = td.getMinutes();
+    let s = td.getSeconds();
+    m = check(m);
+    s = check(s);
+    h = check(h);
+    document.getElementById("time").innerHTML = h + ":" + m + ":" + s;
+    t = setTimeout(function () { Time() }, 500);
+  }
+  function check (u) {
+    if (u < 10) {
+      u = "0" + u;
+    }
+    return u;
+  }
+  let angle = 0;
+
+  function rotateCube () {
+    angle += 7;
+    document.querySelector(".cube").style.transform = `rotate3d(1, 1, 1, ${angle}deg)`;
+  }
+
+  setInterval(rotateCube, 20);
+</script>

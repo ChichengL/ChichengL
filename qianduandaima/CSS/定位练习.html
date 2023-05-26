@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>定位练习</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+    }
+    .tb-promo{
+      position: relative;
+      width: 520px;
+      height: 280px;
+      margin:100px auto;
+    }
+    .tb-promo img{
+      width: 100%;
+    }
+    .prev{
+      left:0;
+      border-top-right-radius: 15px;
+      border-bottom-right-radius: 15px;
+    }
+    .next,.prev{
+      position: absolute;
+      top:50%;
+      width: 20px;
+      height: 30px;
+      background:rgba(0, 0, 0, 0.3);
+      margin-top:-15px;
+      text-decoration: none;
+      text-align: center;
+      line-height: 30px;
+      color:#fff;
+    }
+    .next{
+      right:0;
+      border-top-left-radius: 15px;
+      border-bottom-left-radius: 15px;
+    }
+    .promo-nav{
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      margin-left: -35px;
+      width: 70px;
+      height: 12px;
+      background-color: pink;
+    }
+    .promo-nav li{
+      width: 8px;
+      height: 8px;
+      background-color: #fff;
+      float: left;
+      border-radius: 50%;
+      margin:0 3px; 
+    }
+    li{
+      list-style: none;
+    }
+    /* 不要忘记权重 */
+    .promo-nav .selected{
+      background-color: #ff5000;
+    }
+  </style>
+</head>
+<body>
+  <div class="tb-promo"> 
+    <img src="./练习图片/O1CN01rUB8UG1ptx6aYmq40_!!6000000005419-2-octopus.png" alt="">
+    <a href="#" class="prev"> &lt; </a>
+    <a href="#" class="next"> &gt; </a>
+    <ul class="promo-nav">
+      <li class="selected"></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </div>
+</body>
+</html>

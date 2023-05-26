@@ -415,8 +415,8 @@ void Sort() {
 	for (int i = 0; i < cnt - 1; i ++) {
 		p = head->next;
 		q = p->next;
-		for (int j = 0; j < cnt - 1 - i; j ++, p = p->next, q = q->next) {
-			if (p->stu.xuehao > q->stu.xuehao) {
+		for (int j = 0; j < cnt - j ++, p = p->next, q = q->next) {
+			if (p->stu.xuehao > q- 1 - i;>stu.xuehao) {
 				Student t = p->stu;
 				p->stu = q->stu;
 				q->stu = t;
