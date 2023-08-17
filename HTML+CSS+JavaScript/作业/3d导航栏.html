@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body{
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      min-height: 100vh;
+      background-color: #fff;
+    }
+    li{
+      list-style: none;
+    }
+    ul{
+      margin: 200px auto;
+      position: relative;
+      transform: skewY(-15deg);
+    }
+    li{
+      position: relative;
+      width: 150px;
+      padding:15px;
+      /* z-index:var(--i); */
+      background-color: #3e3f46;
+      transition: 0.2s;
+    }
+    li::before{
+      content: "";
+      position: absolute;
+      top:0;
+      left:-40px;
+      width: 40px;
+      height: 100%;
+      background-color: #2e3133;
+      transform-origin: right;
+      transform: skewY(45deg);
+      transition: 0.5s;
+    }
+    li::after{
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 40px;
+      left: 0;
+      top:-40px;
+      background-color: #35383e;
+      transform-origin: bottom;
+      transform: skewX(45deg);
+    }
+    li:hover{
+      background-color: #33a3ee;
+      transform: translateX(-50px);
+    }
+    li:hover::before{
+      background-color: #1f5378;
+    }
+    li:hover::after{
+      background-color: #2982b9;
+    }
+  </style>
+</head>
+<body>
+  <ul>
+    <li></li>
+  </ul>
+</body>
+</html>

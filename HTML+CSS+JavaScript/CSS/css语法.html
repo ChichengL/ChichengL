@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* 选择器{样式} */
+    /* 给谁改样式{改成什么样式} */
+    /*p就是要更改的对象*/
+    p{
+      color:red; /*颜色*/
+      font-size:20px;/*字体*/
+    }
+    div {
+      color: pink;
+    }
+    /* 上面是标签选择器 */
+    /* 类选择器   可以单独修改某一个或者几个标签
+    先用.标识 再跟紧类名
+    名字不能用纯数字或者中文*/
+    .red{
+      color: red;
+    }
+    .font35{
+      font-size: 35px;
+    }
+  </style>
+</head>
+<body>
+  <p>男</p>
+  <p>男</p>
+  <p>男</p>
+  <!-- 调用多种类要分空格 -->
+  <div class="red font35">女</div>
+  <div>女</div>
+  <div>女</div>
+</body>
+</html>

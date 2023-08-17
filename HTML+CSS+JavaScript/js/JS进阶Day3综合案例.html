@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .modal{
+      position: relative;
+      width: 300px;
+      height: 75px;
+      margin:300px auto;
+      border: 1px solid gray;
+      box-shadow:10ex;
+    }
+    i{
+      position: absolute;
+      right: 15px;
+    }
+
+  </style>
+</head>
+<body>
+  <button class="del">删除</button>
+  <button class="log">登陆</button>
+  <script>
+    //Modal构造函数封装   静态框
+    function Modal(title='',msg = ''){
+      this.modalBox = document.createElement('div')
+      this.modalBox.className = 'modal'
+      this.modalBox.innerHTML = `
+      <div class="header">${title}<i>X</i></div>
+      <div class="body">${msg}</div>
+      `
+    }
+    const log = document.querySelector('.log')
+    document.querySelector('.del').addEventListener('click',()=>{
+      const del = new Modal('温馨提示','你没有删除权限')
+      del.open()
+    })
+    document.querySelector('.log').addEventListener('click',()=>{
+      const log = new Modal('温馨提示','你没有注册')
+      log.open()
+    })
+    // 2.给原型对象挂在open方法
+    Modal.prototype.open = function(){
+      const box = document.querySelector('.modal')
+      box && box.remove()
+      document.body.append(this.modalBox)
+      //盒子显示出来才有点击事件
+      this.modalBox.querySelector('i').addEventListener('click',()=>{
+        this.close()
+      })
+
+    }
+    Modal.prototype.close = function(){
+      this.modalBox.remove()
+    }
+  </script>
+</body>
+</html>

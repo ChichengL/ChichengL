@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form>
+    <span>省份：</span>
+    <select>
+      <option class="province"></option>
+    </select>
+    <span>城市：</span>
+    <select>
+      <option class="city"></option>
+    </select>
+    <span>地区：</span>
+    <select>
+      <option class="area"></option>
+    </select>
+  </form>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // 获取默认第一个省份的名字
+    axios({ url: 'http://hmajax.itheima.net/api/province' }).then(result => {
+      const pname = result.data.list[0]
+      document.querySelector('.province').innerHTML = pname
+      //获取默认第一个城市的名字
+      axios({ url: 'http://hmajax.itheima.net/api/city', params: { pname } }).then(result => {
+        const cname = result.data.list[0]
+        document.querySelector('.city').innerHTML = cname
+        axios({url:'http://hmajax.itheima.net/api/area',params:{pname,cname}}).then(result =>{
+          const areaName = result.data.list[0]
+          document.querySelector('.area').innerHTML = areaName
+        })
+      })
+    }).catch(error =>{
+      console.dir(error)//出现错误无法捕获
+    })
+  </script>
+
+</body>
+
+</html>

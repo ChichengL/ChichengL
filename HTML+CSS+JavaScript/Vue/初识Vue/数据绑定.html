@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+  <div id="root">
+    数据绑定<input type="text" :value='name'><br>
+    <input type="text" v-model:value="name">
+  </div>
+
+  <script>
+    const v = new Vue({
+      // el: '#root',
+      data: {
+        name: '橙'
+      }
+    })
+    v.$mount('#root')
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .box{
+      /* position: relative; */
+      width: 200px;
+      height: 200px;
+      background-color: red;
+      color:#fff;
+      text-align: center;
+      padding:20px 0 ;
+    }
+    span{
+      background-color: black;
+      color:#fff
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <p class="next"></p>
+    <p class="titile">下班倒计时</p>
+    <p class="clock">
+      <span class="hour"></span>
+      <i>:</i>
+      <span class="minutes"></span>
+      <i>:</i>
+      <span class="seconds"></span>
+    </p>
+    <p class="tips">18:30:00下课</p>
+  </div>
+  <script>
+    const ne = document.querySelector('.next')
+    // const date = new Date()
+    ne.innerHTML = `今天是${new Date().toLocaleDateString()}`
+    const h = document.querySelector('.hour')
+    const m = document.querySelector('.minutes')
+    const s = document.querySelector('.seconds')
+    const traget = +new Date('2023/05/25 18:30:30')
+    function fn(){
+      const now = +new Date()
+      let hh = parseInt((traget-now)/1000/60/60)
+      let mm = parseInt((traget-now)/1000/60%60)
+      let ss = parseInt((traget-now)/1000%60)
+      hh = hh<10? '0'+hh:hh
+      mm = mm<10?'0'+mm:mm
+      ss = ss<10?'0'+ss:ss
+      h.innerHTML = hh
+      m.innerHTML = mm
+      s.innerHTML = ss
+    }
+    fn()
+    setInterval(fn,1000)
+  </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../JS/vue.js"></script>
+</head>
+<body>
+  <div id="root">
+    <h2>学校名称:{{school.name}}</h2>
+    <h2>学校地址:{{school.address}}</h2>
+    <h2>学校校长:{{school.leader}}</h2> 
+    <hr>
+    <h2>学生姓名：{{student.name}}</h2>
+    <h2>学生年龄：真实{{student.age.rAge}}，对外{{student.age.sAge}}</h2>
+    <h2>爱好</h2>
+    <ul>
+      <li v-for="(h,index) in student.hobby" :key="index">{{h}}</li>
+    </ul>
+    <h2>朋友们</h2>
+    <ul>
+      <li v-for="(f,index) in student.friends" :key="index">
+        {{f.name}}-----{{f.age}}
+      </li>
+    </ul>
+  </div>
+</body>
+<script>
+  Vue.config.productionTip = false
+  const vm = new Vue({
+    el:'#root',
+    data:{
+      school:{
+        name:'竹中',
+        address:'大竹县',
+        leader:'帅哥'
+      },
+      student:{
+        name:'ChiChengL',
+        age:{
+          rAge:30,
+          sAge:20
+        },
+        hobby:['抽烟','喝酒','打架','烫头'],
+        friends:[
+          {
+            name:'jerry',
+          age:28
+        }
+        ]
+      }
+    }  
+  })
+</script>
+</html>

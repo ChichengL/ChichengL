@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form action="javascript:;" class="example-form">
+    <input type="text" name="username">
+    <br>
+    <input type="password" name="password">
+    <br>
+    <input type="button" value="提交" class="btn">
+  </form>
+
+  <script src="./lib/form-serialize.js"></script>
+  <script>
+    document.querySelector('.btn').addEventListener('click', () => {
+      const form = document.querySelector('.example-form')
+      const data = serialize(form,{hash:true,empty:true})
+      console.log(data)
+    })
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../JS/vue.js"></script>
+  <title>Document</title>
+</head>
+<body>
+  <div id="root">
+    <h2>学校名称{{name}}</h2>
+    <h2>学校地址{{address}}</h2>
+  </div>
+</body>
+<script>
+  Vue.config.productionTip = false
+  // new Vue({
+  //   el:'#root',
+  //   data:{
+  //     name:'二中',
+  //     address:'文昌巷'
+  //   }
+  // })
+  let data={
+    name:'atguigu',
+    address:'Peking',
+    a:{
+      b:1
+    }
+  }
+  const obs = new Observe(data)
+  //创建一个监视的实例对象，用于监视data中属性的变化
+  console.log(obs)
+
+  // 准备实例化对象
+  let vm ={}
+  vm._data = data = obs
+
+  function Observe(obj){
+    //汇总对象中所有属性形成一个数组
+    const keys = Object.keys(obj)
+    keys.forEach(k =>{
+      Object.defineProperty(this,k,{
+        get(){
+          return obj[k]
+        },
+        set(val){
+          console.log(`${k}被更改，需解析模版生成虚拟DOM......`)
+          obj[k] = val
+        }
+      })//this指的实例对象
+    })
+  }
+</script>
+</html>

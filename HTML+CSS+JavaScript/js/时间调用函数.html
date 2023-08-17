@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    let time = +prompt('请输入一个时间，单位为秒')
+    function getTime(t){
+        let h = parseInt(time/60/60%24)
+        if(h<10)
+          h = '0'+h;
+        let m = parseInt(time/60%60)
+        if(m<10)
+          m = '0'+m
+        let s = time%60
+          if(t<10)
+            s = '0'+s
+        document.write(`转化为的  时间为${h}:${m}:${s}`)
+    }
+    // getTime(time)
+    let arr1 = [10]
+    let arr2 = arr1
+    arr2[0] = 20 
+    document.write(arr1[0])
+  </script>
+</body>
+</html>

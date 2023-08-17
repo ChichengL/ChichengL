@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      height: 80px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    th {
+      padding: 5px 30px;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid #000;
+    }
+  </style>
+
+</head>
+
+<body>
+  <h2>订单确认</h2>
+
+</body>
+<script>
+  // let price = +prompt('请输入价格')
+  // let num = +prompt('请输入数量')
+  // let sum = price * num
+  // let address = prompt('请输入收货地址')
+  // document.write(`
+  // <table>
+  //   <tr>
+  //     <td><b>商品名称</b></td>
+  //     <td><b>商品价格</b></td>
+  //     <td><b>商品数量</b></td>
+  //     <td><b>总价</b></td>
+  //     <td><b>收货地址</b></td>
+  //   </tr>
+  //   <tr>
+  //     <td>小米青春版</td>
+  //     <td>${price}元</td>
+  //     <td>${num}</td>
+  //     <td>${sum}元</td>
+  //     <td>${address}</td>
+  //   </tr>
+  // </table>`)
+//   const arr = [1,5,3,8]
+
+// //forEach
+// arr.forEach(function(elem,index){
+//     console.log(elem+' '+index)
+// })// 输出1 5 3 8
+// //filter
+// const arr1 = arr.filter(elem => elem>=4)
+// console.log(arr1);
+// const arr2 = arr.map(elem => elem+2)
+// console.log(arr2);
+
+
+
+// let that//创建一个变量存储this指向的哪
+// Array.prototype.max = function(){
+//   that = this//给变量赋值
+//   return Math.max(...this)
+// }
+// const arr1 = [1,2,3]
+// console.log(arr1.max())//调用
+
+// const arr2 = [2,3,4,56]
+// console.log(that==arr1)
+// console.log(that==arr2)
+
+
+// let that = [],i = 0
+// function Pig(uname,age){
+//   this.uname = uname
+//   this.age = age
+//   that[i++] = this
+// }
+// const a = new Pig('A',1)
+// const b = new Pig('B',2)
+// const c = new Pig('C',3)
+// let arr=[a,b,c]
+// for(let j = 0; j < i; j ++)
+// { 
+//   console.log(that[j]==arr[j]);
+// }
+
+// const counter = (x,y)=>{
+//     if(x==undefined || y==undefined)
+//         throw new Error('参数不能为空')
+//     return x+y
+// }
+// console.log(counter(1,0));
+class Demo{
+  constructor(){
+    this.name='demo'
+    console.log(this.name)
+  }
+  getName(){
+    console.log('111111111',this.name)
+  }
+}
+
+Demo.prototype.getName = ()=>{
+  console.log('22222',this.name)
+}
+
+const demo = new Demo()
+demo.getName()
+</script>
+
+</html>

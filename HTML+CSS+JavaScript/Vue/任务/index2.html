@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
+  <title>Document</title>
+</head>
+<body>
+
+  <div class="container">
+    <button class="traceback" onclick="history.go(-1)">返回</button>
+    <div class="name_next"></div>
+    <div class="id_next"></div>
+    <div class="introduction_next"></div>
+  </div>
+</body>
+<script>
+  const ID = localStorage.getItem('ID')
+  const person = JSON.parse(localStorage.getItem('Array')).filter((item) =>{
+    return item.id===ID
+  })[0]
+  console.log(person)
+  document.querySelector('.name_next').innerHTML =`<h2>姓名</h2>`+ person.name
+  document.querySelector('.id_next').innerHTML =`<h2>学号</h2>`+ person.id
+  document.querySelector('.introduction_next').innerHTML = `<h2>简介</h2>`+person.introduction
+</script>
+</html>
