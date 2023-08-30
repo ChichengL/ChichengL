@@ -2078,3 +2078,2981 @@ vm和vc的东西有99%的相似度，但是vc没有el配置项，而vm有，而�
 ![](Vue.assets/Vue和VueComponent的关系.png)
 
 因此在Vue.prototype上面加一个属性，VueComponent的实例对象也能使用
+
+
+
+
+
+
+
+### 单文件组件（重要）
+
+比如单独的xxx.vue的文件，然后用脚手架或者webpack打包才能使用。
+
+对于单文件组件需要暴露才可被引用
+
+暴露方式：（1）分别暴露 
+
+```js
+export const school = Vue.extend(options)
+```
+
+(2)统一暴露
+
+```js
+const school = Vue.extend(options)
+export {school}
+```
+
+(3)默认暴露
+
+```js
+const school = Vue.extend(options)
+export default {school}
+```
+
+默认暴露最常用，因为使用的时候直接 import ??? from ???
+
+前面两个，分别暴露和统一暴露需要 import {???} from ???
+
+可以简化
+
+```js
+export default Vue.extend(options)
+//或者
+export default {
+    name:'School',
+    data(){
+        return{
+            schoolName:'111',
+            address:'222'
+        }
+    },
+    methods:{
+        showName(){
+			alert(this.schoolName)
+        }
+    }
+}
+```
+
+
+
+
+
+```vue
+<template>
+  
+</template>
+
+<script>
+export default {
+
+}
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+安装了vetur插件之后直接打<v + Enter就可以快速出现模版
+
+模版里面必须要有一个根元素包裹	
+
+
+
+创建School组件
+
+```vue
+<template>
+<!-- 组件的结构   -->
+  <div class="demo">
+    <h2>学校名称{{ schoolName }}</h2>
+    <h2>学校地址{{ address }}</h2>
+    <button @click="showName">点我提示学校名</button>
+  </div>
+</template>
+
+<script>
+//
+//组件交互相关的代码（数据方法）
+//下面这个叫分别暴露
+  export const School = Vue.extend({
+    name:'School',
+    data(){
+      return {
+        schoolName: '北京尚硅谷',
+        address: '北京昌平区'
+      }
+    },
+    methods:{
+      showName(){
+        alert(this.schoolName)
+      }
+    }
+  })
+  //export {school}统一暴露
+  // export default {school}默认暴露
+</script>
+
+<style>
+  /*  组件的样式 */
+  .demo{
+    background-color: orange;
+  }
+</style>
+```
+
+创建Student
+
+```vue
+<template>
+<!-- 组件的结构   -->
+  <div>
+    <h2>学生姓名{{ studentName }}</h2>
+    <h2>学生年龄{{ age }}</h2>
+    <button @click="showName">点我提示学校名</button>
+  </div>
+</template>
+
+<script>
+//
+//组件交互相关的代码（数据方法）
+//下面这个叫分别暴露
+  export default {
+    name:'Student',
+    data(){
+      return {
+        studentName: '北京尚硅谷',
+        age: '北京昌平区'
+      }
+    }
+  }
+  //export {school}统一暴露
+  // export default {school}默认暴露
+</script>
+```
+
+创建一个汇总的组件App
+
+```vue
+<template>
+  <div>
+    <School></School>
+    <!-- 上面可以写成<School/> -->
+    <Student></Student>
+  </div>
+</template>
+
+<script>
+  import { School } from './School.vue';
+  import { Student } from './Student.vue';
+  export default {
+    name:'App',
+    components:{
+      School,
+      Student
+    }
+  } 
+</script>
+```
+
+引入组件
+
+```js
+import App from './App.vue'
+
+new Vue({
+  el:'#root',
+  template:'<App></App>',
+  components:{
+    App 
+  },
+})
+```
+
+使用组件
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>练习单文件组件语法</title>
+</head>
+<body>
+  <!-- 准备一个容器 -->
+  <div id="root">
+  </div>
+</body>
+<script src="../../JS/vue.js"></script>
+<script src="./main.js"></script>
+</html>
+```
+
+
+
+
+
+### 安装脚手架
+
+安装脚手架
+
+npm install -g @vue/cli
+
+先使用命令符去进入到需要创建项目的文件夹中然后 vue create xxx创建项目
+
+在项目文件夹中执行npm run serve可以执行项目
+
+```js
+import Vue from 'vue'
+new Vue({
+    el:'#root',
+    render:h =>h(App)
+})
+```
+
+对于不同版本的Vue：
+
+​	vue.js和vue.runtime.xxx.js的区别
+
+（1）vue.js是完整版的Vue，包含：核心功能+模版解析器
+
+（2）vue.runtime.xxx.js是运行版的vue，只包含核心功能，没有模版解析器
+
+因为vue.runtime.xxx.js没有模版解析器，所以不能使用template配置项，需要使用render函数收到的createElement函数去指定具体内容。render: h=>h(‘h1’,’Hello World’)
+
+
+
+### 修改默认配置
+
+在官网上查找文档，观察哪些配置项可以改变，比如vue.config.js
+
+在上述文件中添加pages项
+
+```js
+const { defineConfig } = require('@vue/cli-service')
+module.exports = defineConfig({
+  transpileDependencies: true
+})
+module.exports ={
+  pages:{
+    index:{
+      //入口
+      entry: 'src/main.js'
+    }
+  },
+  lintOnSave:false//关闭语法检查
+}
+
+```
+
+选择需要使用的js文件
+
+
+
+当项目结束再开启语法检查，不然在书写代码的时候，代码持续报错相当麻烦
+
+
+
+### ref属性
+
+1.被用来给元素或者子组件注册引用信息代替掉id（避免使用原生js操作）
+
+2.应用在html标签上获取的是真实的DOM元素，应用在组件标签上是组件实例对象
+
+使用方式   打标识：<h1 ref='xxx'></h1>或者<School ref='xxx'></School>
+
+获取：this.$refs.xxx。
+
+这里的this指向使用的组件
+
+
+
+
+
+### props配置
+
+往标签里面传递数据，使用<Student name='张三' :age="18" sex='男'></Student>
+
+这里打`:`是为了让传入的数据变为数字类型，这里的:是v-bind，v-bind绑定后表达式会运算
+
+```js
+ export default {
+    name: 'mySchool',
+    data(){
+      return {
+        msg:'俺是耕田的',
+        // name: '张三',
+        // age: 18,
+        // sex: '男'
+      }
+    },
+    props:['name','age','sex']
+  }
+```
+
+props相当于接受这几个东东，因此在data()里面不需要有这个	
+
+(1)props:[]数组形式，只有名字，没有类型限制                简单声明接受	
+
+(2)props:{}对象形式就不同了，对象形式能限定传入的类型		接受的时候对数据进行类型限制
+
+```js
+export default{
+	name:'MySchool',
+    data(){
+        return{
+            msg:'七中学子'
+        }
+    },
+    props:{
+        name:String,
+        age:Number,
+        sex:String
+    }
+}
+```
+
+(3)props:{}对象形式就不同了，对象形式能限定传入的类型		接受的时候对数据进行类型限制+默认值的指定+必要性的限制
+
+```js
+export default{
+	name:'MySchool',
+    data(){
+        return{
+            msg:'七中学子'
+        }
+    },
+    props:{
+        name:{
+            type:String,//类型：字符串
+            required:true//必要的
+        },
+        age:{
+            type:Number,
+            default:99//默认值99
+        },
+        sex:{
+            type:String,//类型：字符串
+            required:true//必要的
+        }
+    }
+}
+```
+
+尽可能要避免更改prop配置项里面的属性，不然会产生奇奇怪怪的问题。
+
+如果要修改，可以利用props配置项里面的优先级高于data里面属性。
+
+```js
+export default{
+    data(){
+        return{
+		myAge:this.age,
+   		msg:'Hello'
+        }
+    },
+    props:['name','age','sex'],
+    methods:{
+		updataAge(){
+            this.myAge = 23
+        }
+    }
+}
+```
+
+props优先被接受并且放在VueComponent上
+
+总结：
+
+功能让组件接收外部传过来的数据
+
+（1）传递数据：<Demo name="xxx"/>
+
+（2）接收数据：
+
+​		第一种只接收：props:[‘name’],
+
+​		第二种限制类型：props:{name:String}
+
+​		第三种（限制类型、限制必要性、指定默认值）：
+
+​			props:{name:{type:String,required:true,default:‘老王’}}
+
+props是只读的，Vue底层会监测你对props的修改，如果进行修改，就会出现警告
+
+
+
+
+
+### mixin混入
+
+将两个组件共有的东西提取出来变为一个新的，使用时直接调用即可
+
+比如School和Student组件共有showName方法，将其提取出来，放入mixin.js文件中，然后再引入混合即可
+
+```js
+import {mixin,mixin2} from '../mixin'
+export default {
+    name: 'myStudent',
+    data(){
+      return{
+        name:'张三',
+        sex:'男',
+      }
+    },
+    mixins:[mixin,mixin2],
+}
+```
+
+mixin.js
+
+```js
+export const mixin =  {
+  methods:{
+    showName(){
+      alert(this.name)
+    }
+  }
+}
+export const mixin2 = {
+  data() {
+    return {
+      x:100,
+      y:200
+    }
+  },
+}
+```
+
+得到的数据回追加到后面。为混合（你我的都可以使用）。
+
+原则是：data的优先级更高。即没有的追加上，有的以data中的为主。
+
+但是对于生命周期钩子（HOOK）是都要，每个写出的钩子都会调用，不存在替换。但是顺序是混合里面的在前，自身的在后。
+
+当然除了在组件上引用也可以在main.js中引用
+
+```js
+//引入vue
+import {createApp} from 'vue'
+//引入app
+import App from './App.vue'
+
+import {mixin,mixin2} from './mixin'
+const app=createApp(App)
+app.mixin(mixin)
+app.mixin(mixin2)
+app.mount('#app')
+```
+
+这样可以使得每一个VueComponent都挂载上mixin的数据。
+
+故全局混入：Vue.mixin(xxx)或者 app.mixin(xxx)
+
+局部混入：mixins:[‘xxx’]
+
+
+
+
+
+### 插件
+
+其本质就是包含在install方法的一个对象，install的第一个参数是Vue，第二个参数时插件使用者传递的参数，用于增强Vue
+
+可以先导入插件，然后使用Vue.use(xxx)去使用
+
+定义plugins.js
+
+```js
+export default {
+    install(Vue){
+        Vue.prototype.hello = ()=> alert('你好')
+        Vue.filter('mySlice',function(value){
+            return value.slice(0,4)
+        })
+    }
+}
+```
+
+插件的使用
+
+import plugins from ../plugins
+
+Vue.use(plugins)或者app.use(plugins)
+
+
+
+### scoped
+
+当写了样式之后，如果名字相同那么就会冲突，这时候就是后引入哪一个，哪一个的冲突样式就作为最终样式
+
+当然在样式上加上scoped那么就可以锁定其作用域，只服务它自己，不再贡献。
+
+比如<style scoped></style>这个样式只服务于当前组件。一般不在app.vue里面去使用这个
+
+样式里面还有lang         <style lang="less"></style>这个东西就是样式编译的语言为less，不写默认为css
+
+
+
+
+
+### Todo-list案例
+
+#### 静态页面
+
+​	先分析，拆分为多个组件，通过组件复用来完成页面
+
+
+
+#### 展示动态数据：
+
+​	数据类型，名称？数据保存何处（哪个组件）？
+
+对于数据的独立id可以使用uuid，可以使用他的简洁版nanoid
+
+数据存储，可以将数据放在app组件中，以保证header和list两个组件能够共用一个数据
+
+如何将儿子的数据传入父亲中？
+
+将父亲的方法传入其中即可，函数是在父亲那，儿子可以使用来传入东西
+
+其父亲
+
+```js
+export default {
+  name:'App',
+  components: {
+    myHeader,myList,myFooter
+  },
+  data(){
+      return{
+        todos:[
+          {id:'0001',title:'吃饭',done:true},
+          {id:'0002',title:'睡觉',done:false},
+          {id:'0003',title:'打游戏',done:true},
+        ]
+      }
+    },
+    methods:{
+      receive(rec){
+        this.todos.unshift(rec)
+      }
+    }
+}
+```
+
+其儿子Header
+
+```js
+import {nanoid} from 'nanoid'
+  export default {
+    name:'myHeader',
+    methods:{
+      add(e){
+        //将用户的输入包装弄成输入对象
+        e.target.value = e.target.value.trim()
+        const todoObj={
+          id:nanoid(),
+          title:e.target.value.trim(),
+          done:false
+        }
+        this.receive(todoObj)//儿子使用父亲的方法，父亲可以得到todoObj数据
+      }
+    },
+    props:['receive']
+  }
+```
+
+
+
+
+
+data,props,methods,computed这些都是挂载在vc（每一个组件）上面的，即各个名字不能重名
+
+![image-20230819224828949](Vue.assets/image-20230819224828949.png)
+
+
+
+当input输入框类型是checkbox，且v-model绑定了一个布尔值类型。
+
+那么这个布尔值就能决定是否勾选
+
+修改隐藏在对象里面的属性值（使用props），不会报错。
+
+
+
+
+
+#### 添加todos
+
+在App组件里面添加addTodo方法，再将方法传递给Header组件，让Header组件调用并且传参数。那么就可加入其中
+
+```vue
+<template>
+	<div id="root">
+        <myHeader :addTodo="addTodo"/>
+    </div>
+</template>
+
+<script>
+export default {
+    methods:{
+        addTodo(todo){
+            this.todos.unshift(todo)
+        }
+    }
+}
+</script>
+```
+
+使用addTodo
+
+```js
+import {nanoid} from 'nanoid'
+  export default {
+    name:'myHeader',
+    methods:{
+      add(e){
+        //判断用户是否输入了内容
+        if(!e.target.value.trim()) return
+        //将用户的输入包装弄成输入对象
+        const todoObj={id:nanoid(),title:e.target.value.trim(),done:false}
+        //将输入对象传给父组件
+        this.addTodo(todoObj)
+        e.target.value = ''
+      }
+    },
+    props:['addTodo']
+  }
+```
+
+
+
+#### 删除一个todo和检查todo的勾选
+
+因为删除涉及到item，那么其方法要 App ——>myList——>myItem
+
+其核心
+
+app.vue
+
+```vue
+<template>
+	<div id="root">
+        <myList :todos="todos" :checkTodo="checkTodo" :delTodo="delTodo"/>
+    </div>
+</template>
+
+<script>
+export default {
+    methods:{
+        delTodo(id){
+        	this.todos = this.todos.filter(item =>{
+          	return item.id !== id
+        })
+      },
+        checkTodo(id){
+        	this.todos.forEach(item=>{
+          	if(item.id===id){
+            	item.done=!item.done
+          }
+        })
+      },
+    }
+}
+</script>
+```
+
+myList.vue
+
+```vue
+<template>
+  <ul class="todo-main">
+    <myItem 
+    v-for="todoObj in todos" 
+    :key="todoObj.id"  
+    :todo="todoObj" 
+    :checkTodo="checkTodo"
+    :delTodo="delTodo"
+    ></myItem>
+  </ul>
+</template>
+
+<script>
+import myItem from './myItem.vue'
+  export default {
+    name:'myList',
+    components:{myItem},
+    props:['todos','checkTodo','delTodo']
+  }
+</script>
+```
+
+myItem.vue
+
+```vue
+<template>
+    <li>
+      <label>
+        <input type="checkbox" :checked="todo.done" @change="handleCheck(todo.id)"/>
+        <span>{{todo.title}}</span>
+      </label>
+      <button class="btn btn-danger" @click="Delete(todo.id)">删除</button>
+    </li>
+</template>
+ 
+<script>
+  export default {
+    name:'myItem',
+    //声明接收todo对象
+    props:['todo','checkTodo','delTodo'],
+    methods:{
+      handleCheck(id){
+        //通知app组件将对应的todo对象的done属性取反
+        this.checkTodo(id)
+      },
+      Delete(id){
+        //通知app组件删除对应的todo对象
+        if(confirm('确定删除吗')) this.delTodo(id)
+      }
+    }
+  }
+</script>
+```
+
+
+
+
+
+统计todo个数
+
+app.vue
+
+```vue
+<template>
+<myFooter :todos="todos" ></myFooter>
+</template>
+```
+
+myFooter.vue
+
+```vue
+<template>
+  <div class="todo-footer">
+      <label>
+        <input type="checkbox"/>
+      </label>
+      <span>
+        <span>已完成{{ todos.filter(item =>{return item.done}).length  }}</span> / 全部{{ todos.length }}
+      </span>
+      <button class="btn btn-danger">清除已完成任务</button>
+    </div>
+</template>
+
+<script>
+  export default {
+    name:'myFooter',
+    props:['todos']
+  }
+</script>
+```
+
+除了filter统计个数还能使用forEach函数。
+
+此外还可以是reduce函数，reduce((pre,current)=>{},起始个数)
+
+起初的pre是起始个数，后面每个pre都是上一个循环的返回值。
+
+最后一次函数返回值作为reduce得到的数。
+
+current是每一个当前的数值项
+
+```js
+export default{
+    props:['todos'],
+    methods:{
+        doneTotal(){
+            return this.todos.reduce((pre,cur)=>{
+                return pre + (cur.done?1:0)
+            },0)
+        }
+    }
+}
+```
+
+这样也可以统计完成的个数
+
+#### 统计个数
+
+```vue
+<template>
+  <div class="todo-footer" v-show="total>0">
+      <label>
+        <input type="checkbox" :checked="isAllTodos" @change="checkAll"/>
+      </label>
+      <span>
+        <span>已完成{{ doneTotal  }}</span> / 全部{{ total }}
+      </span>
+      <button class="btn btn-danger" @click="delAllTodos">清除已完成任务</button>
+    </div>
+</template>
+
+<script>
+  export default {
+    name:'myFooter',
+    props:['todos','delAllTodos'],
+    computed:{
+      total(){
+        return this.todos.length
+      },
+      doneTotal(){
+        return this.todos.filter(item =>{return item.done}).length
+      },
+      isAllTodos(){
+        return this.total === this.doneTotal && this.total > 0
+      }
+    },
+    methods:{
+      checkAll(e){
+        this.todos.forEach(item => item.done = e.target.checked)
+      }
+    }
+  }
+</script>
+```
+
+
+
+除了像上方一样使用doneTotal和total等这些计算属性。
+
+还可以使用v-model进行绑定。
+
+```vue
+<template>
+  <div class="todo-footer" v-show="total>0">
+      <label>
+        <input type="checkbox" v-model="isAll"/>
+      </label>
+      <span>
+        <span>已完成{{ doneTotal  }}</span> / 全部{{ total }}
+      </span>
+      <button class="btn btn-danger" @click="delAllTodos">清除已完成任务</button>
+    </div>
+</template>
+
+<script>
+  export default {
+    name:'myFooter',
+    props:['todos','delAllTodos'],
+    computed:{
+      total(){
+        return this.todos.length
+      },
+      doneTotal(){
+        return this.todos.filter(item =>{return item.done}).length
+      },
+      isAll:{
+        get(){
+            return this.doneTotal === this.total && this.total > 0
+        },
+        set(value){
+         	this.todos.forEach(item => item.done = value)    
+         }
+      }
+    }
+  }
+</script>
+```
+
+
+
+#### 编辑（更改）
+
+添加编辑按钮
+
+```html
+<button class="btn btn-edit" @click="Edit(todo)" v-show="!todo.isEdit">编辑</button>
+```
+
+然后触发事件
+
+```js
+Edit(todo){
+        if(todo.hasOwnProperty.call('isEdit')){
+          todo.isEdit = true
+        }else{
+          console.log("@")
+          this.$set(todo,'isEdit',true)
+        }
+         setTimeout(()=>{
+          this.$refs.inputTitle.focus()
+        },100)
+      },
+      //编辑后失去焦点
+      handBlur(todo,e){
+        todo.isEdit = false
+        if(e.target.value.trim()=='') return alert('编辑不能为空')
+        this.$bus.$emit('updataTodo',todo.id,e.target.value)
+      }
+    }
+```
+
+这里如果直接使用hasOwnProperty会报错，因为不允许直接调用原型上面的方法。
+
+为了点击编辑后获取焦点，为什么需要setTimeout，因为该函数全部执行之后才会更新input，但是`全部执行完之前是display:none`，那么修改得到焦点就不奏效。
+
+当然还有其它方法，比如一个`新的钩子`，this.$nextTick(()=>{this.$refs.inputTitle.focus()})。
+
+```js
+this.$nextTick(function(){
+    this.$refs.inputTitle.focus()
+})
+```
+
+
+
+这个API是在下一次DOM节点更新后再执行的一个回调函数
+
+使用场景：改变数据，要基于改变后的新的DOM进行操作，那么要在nextTick所指定的回调函数中执行
+
+
+
+#### TodoList总结
+
+##### 编码流程
+
+（1）拆分静态组件：组件要按照功能点拆分，命名不能与html冲突
+
+（2）实现动态组件：要考虑数据的存储位置，数据是一个组件用，还是一群组件使用。一个组件使用放在自身即可，一群组件在用需要放在他们的公共父组件上
+
+（3）实现交互，从绑定事件开始
+
+
+
+##### props适用于：
+
+（1）父组件==>子组件通信
+
+（2）子组件==>父组件通信（需要父组件给子组件传递一个函数）
+
+使用v-model切记不要绑定props传过来的值，因为props传过来的值不可修改只能使用
+
+props传过来的若是对象类型的值，修改对象中的属性时Vue不会报错，但是不推荐这样做
+
+
+
+### 本地存储
+
+#### localStorage
+
+关闭浏览器也能存在
+
+存储
+
+使用localStorage.setItem('key',value)储存。
+
+如果存储的值是对象形式，直接存储，值会出现[object  Object],因为对象.toString()，值就是这个。
+
+故需要JSON.stringify(对象)，得到的是，对象转化为JSON字符串
+
+
+
+读取
+
+localStorage.setItem('key')返回值。
+
+如果是JSON字符串，那么需要JSON.parse(JSON字符串)
+
+
+
+删除
+
+localStorage.removeItem('key')
+
+
+
+清空
+
+localStorage.clear()
+
+
+
+
+
+#### sessionStorage
+
+浏览器关闭就消失。（每次会话结束即消失，即浏览器的关闭）
+
+其他API的调用和localStorage一样
+
+
+
+localStorage存储的东西需要手动关闭才会消失。
+
+xxxxStorage.getItem()如果xxx对应的value获取不到，那么得到的值是null，JSON.parse(null)的结果仍然是null
+
+
+
+本地存储TodoList的数据，那么可以使用监视属性。
+
+但是如果是监视对象，那么需要深度监视，那么需要deep:true，然后再handler函数里面写自己需要的东西
+
+
+
+### 组件自定义事件
+
+以前是，通过props然后父组件给子组件方法和数据，才能让数据，子——————>父
+
+比如  在App组件中给student 组件绑定一个点击事件
+
+<Student v-on:demo="getStudentName" />
+
+demo是事件名，getStudentName是回调函数的名字。
+
+然后再student组件中，在按钮中绑定点击事件，使用this.$emit('demo')，这样就能触发student上面的demo事件，this.$emit('demo',数据).这样在App组件中的demo方法就可以得到传递过来的数据了
+
+```js
+this.$emit('demo',数据)
+```
+
+这里相当于触发事件
+
+除了绑定事件，还可以使用ref属性
+
+这样可以使用this.$refs.xxx拿到该组件的子组件的实例化对象，然后再使用mounted进行挂载之后的处理
+
+<Student ref="student"/>
+
+```js
+this.$refs.student.$on('demo',this.getStudentName)
+```
+
+这样写略显复杂，但是更加灵活
+
+
+
+如果需要解绑，那么需要绑定一个回调函数，比如
+
+```html
+<button @click="sendStudentName">
+    把学生名给App
+</button>
+<button @click="unbind">
+    点击解除绑定
+</button>
+```
+
+```js
+export default{
+    methods:{
+        sendStudentName(){
+            //触发Student组件实例对象身上的demo事件
+            this.$emit('demo',this.name,666,888,999,001)
+        },
+        unbind(){
+            //解除单个绑定
+            this.$off('demo')
+            // this.$off(['demo','at'])解绑多个
+        }
+    }
+}
+```
+
+如果是this.$off()那么就是全部事件都解绑
+
+
+
+销毁后也就是destoryed钩子被触发了之后，那么所有的自定义事件都不会奏效了，但是原生的js事件仍然不受影响
+
+
+
+当前属性要被使用要在data，props，computed其中一个才行。
+
+
+
+如果是使用ref绑定的事件，那么使用的时候是，this.$refs.组件名.$on('事件名',回调函数)，如果这个回调函数是普通函数的形式，即function(){函数体}，那么this指向触发事件的组件实例对象，二如果是写成箭头函数，那么就指向当前这个组件实例对象，因为函数里面没有this，那么向外寻找
+
+但是这个回调函数中的this是指向绑定事件（触发事件）的组件的实例对象
+
+如果是写在methods里面的方法，那么这个函数的this指向就是当前组件实例对象
+
+`在组件标签中绑定原生的js事件`
+
+如果在组件中绑定原生事件也是可以的，但是，如果是这样<Student @click="show" />
+
+那么就会认为这个click是自定义事件从而不去触发（除非在Student组件中写this.$emit('click')）。那么想实现需要`<Student @click.native="show"/>`，使用native修饰符。
+
+
+
+总结：
+
+组件自定义事件是组件间通信的一种方式，适用于`子=====>父`。
+
+使用场景：A是父组件，B是子组件，B想给A传递数据，那么就要在A中给B绑定自定义事件（事件的回调在A中）
+
+```js
+<template>
+  <div>
+    <student @atguigu="getStudentName"></student>
+    <student ref="student"/>
+  </div>
+</template>
+
+<script>
+import Student from './components/Student.vue'
+export default {
+  components: {
+    Student
+  },
+  methods:{
+    getStudentName(name,...a){
+      // console.log(name)
+      this.StudentName = name
+      console.log(a)
+      }
+    }
+}
+</script>
+```
+
+比如这个就是A，回调函数是getStudentName，事件名是atguigu。
+
+那么在子组件，即B中，需要写this.$emit('atguigu',this.name)
+
+绑定：
+
+​		（1）在父组件中`<Student @atguigu="test"/>或者<Student v-on:atguigu="test" />`
+
+​		（2）在父组件中
+
+```js
+<Student ref='demo'>
+    ....
+mounted(){
+    this.$refs.demo.$on('atguigu',this.test)
+}
+```
+
+如果想事件只触发一次，可以使用once修饰符，或者$once方法。
+
+触发：`this.$emit('atguigu',数据)`
+
+解除绑定：`this.$off('atguigu')`
+
+组件也可以绑定原生的DOM事件，需要使用native修饰符进行修饰。
+
+如果通过`this.$refs.xxx.$on('atguigu',回调)`绑定事件时，回调要么配置在methods中，要么使用箭头函数，否则this指向会出问题
+
+
+
+
+
+### 全局事件总线
+
+实现`任意组件间的通信 `
+
+需要一个全局的x，使得所有的组件实例对象都可访问。
+
+<img src="Vue.assets/image-20230825204056004.png" alt="image-20230825204056004" style="zoom:80%;" />
+
+那么可以通过Vue.prototype实现，因为VueComponent.prototype.__proto = Vue.prototype
+
+因此每一个组件实例对象都能访问到Vue的原型上面的东西
+
+Vue.prototype.x = {a:1,b:2}只是一个普普通通的对象，是没有$emit,$on,$off等这些东西的，这些存在于`Vue.prototype`上
+
+要使用那么只能是VC或者Vm
+
+
+
+先看vc
+
+main.js
+
+```js
+const Demo = Vue.extend({})
+const d = new Demo()
+//Demo是构造组件的函数，d是Demo的实例化对象
+Vue.prototype.x = d
+```
+
+School.vue
+
+```js
+mounted(){
+        //给x绑定一个hello事件，该事件的回调函数在School里面
+        this.x.$on('hello',(data =>{
+            console.log('我是School组件,收到了数据',data)
+        }))
+    }
+```
+
+Student.vue
+
+```js
+ methods:{
+        sendStudentName(){
+            this.x.$emit('hello',666)
+            //调用hello事件
+        }
+    }
+```
+
+实现在Student和School组件的兄弟通信。
+
+
+
+`使用Vm`（更加标准）
+
+```js
+const vm = new Vue({
+    el:'#app',
+    render:h => h(App),
+    beforeCreate(){
+		Vue.prototype.x = this
+    }
+})
+```
+
+一般情况下是将x替换为`$bus`（意为总线）
+
+因为这个是公共的那么，挂载的函数名不能重复。
+
+
+
+接收数据
+
+```js
+methods:{
+    demo(data){....}
+},
+....
+mounted(){
+    this.$bus.$on('xxx',this.demo)
+}
+```
+
+提供数据
+
+```js
+this.$bus.$emit('xxx',数据)
+```
+
+最好在beforeDestroy钩子中，用$off去解绑当前组件所用到的事件
+
+
+
+### 消息订阅与发布
+
+可以使用pubsub.js库来实现消息订阅（接收）与发布（传出）
+
+npm i pubsub-js下载pubsub插件
+
+比如像上面那个一样，School接受，Student发布。
+
+那么需要School和Student都导入pubsub   
+
+```js
+import pubsub from 'pubsub-js'
+```
+
+然后在Student组件里面
+
+```js
+...
+methods:{
+	sendStudentName(){
+        pubsub.publish('hello',this.name)
+    }
+}
+```
+
+在School里面接受消息
+
+```js
+...
+mounted(){
+    this.pubId = pubsub.subscribe('hello',(msg,data)=>{
+        console.log('School组件接收到了消息',data)
+    })
+},
+beforeDestroy(){
+	pubsub.unsubscribe(this.pubId)//取消订阅
+}
+```
+
+在回调函数中后面那个才是需要拿到的数据
+
+`在mounted()`钩子里面，如果pubsub.subscribe里面的回调函数写成正常函数，那么他的this指向是undefined，因此要写成`箭头函数`，或者是在methods里面配置函数，然后在回调函数那里变为this.xxx来进行调用
+
+当有的传入的参数不需要的时候可以使用_去占位比如  
+
+```js
+pubsub.subscribe('hello',(_,data)=>{
+    console.log('School组件接收到了消息',data)
+})
+```
+
+调用原型上面的方法，在vue中会引起错误，因此
+
+```js
+item.hasOwnProperty('xxx')//错误的
+item.hanOwnProperty.call('xxx')//是正确的
+```
+
+在调用方法的时候参数里面传入$event，就可以收到一个事件对象
+
+
+
+
+
+#### nextTick()
+
+当然还有其它方法，比如一个API，this.$nextTick(()=>{this.$refs.inputTitle.focus()})。
+
+这个API是在下一次DOM节点更新后再执行的一个回调函数
+
+使用场景：改变数据，要基于改变后的新的DOM进行操作，那么要在nextTick所指定的回调函数中执行
+
+
+
+### 过度与动画
+
+#### 动画
+
+在vue中使用动画先将动画样式写好
+
+```css
+.v-enter-active{
+    animation: demo 1s
+}
+.v-leave-active{
+    animation:demo 1s reverse
+}
+@keyframes demo {
+    from{
+        transform:translateX(-100%)
+    }to{
+        transform: translateX(0);
+    }
+}
+```
+
+然后再用<transition></transition>标签包裹需要添加动画的标签。
+
+这样就可以执行动画了。
+
+transition标签里面可以写名字，那么如果写了，可以区分不同的动画
+
+```html
+<transition name='ChiChengL'></transition>
+```
+
+那么在css的动画那里就要改变
+
+```css
+.ChiChengL-enter-active{
+    animation: demo 1s
+}
+.ChiChengL-leave-active{
+    animation:demo 1s reverse
+}
+```
+
+如果不写名字默认为v。
+
+如果出场就需要动画那么可以加个appear，让其值为真
+
+```html
+<transition :appear="true"></transition>
+<transition appear></transition>
+```
+
+这两种都行。
+
+这个transition在DOM树上不会呈现，类似于template标签
+
+
+
+#### 过度
+
+h1是添加的标签
+
+ ```css
+h1{
+      background-color: orange;
+      transition:0.5s linear;
+  }
+  /* 进入的起点 */
+  .hello-enter{
+    transform: translateX(-100%);
+  }
+  /* 进入的终点 */
+  .hello-enter-to{
+    transform: translateX(0);
+  }/* 离开的起点 */
+  .hello-leave{
+    transform: translateX(0);
+  }
+  /* 离开的终点 */
+  .hello-leave-to{
+    transform: translateX(-100%);
+  }
+ ```
+
+因为有重复，那么可以简写，外加优化（不破坏原来的样式）
+
+```css
+h1{
+      background-color: orange;
+  }
+  /* 进入的起点 *//* 离开的终点 */
+  .hello-enter,.hello-leave-to{
+    transform: translateX(-100%);
+  }
+  .hello-enter-active,.hello-leave-active{
+    transition:0.5s linear
+  }
+  /* 进入的终点 *//* 离开的起点 */
+  .hello-enter-to,.hello-leave{
+    transform: translateX(0);
+  }
+```
+
+
+
+如果在给两个标签加相同的过度效果，那么可以使用transition-group标签，然后给里面的每个子元素都确定一个唯一的key值，比如
+
+```html
+<transition-group>
+	<h1 key='1' v-show="!isShow">
+        111111
+    </h1>
+    <h2 key='2' v-show="isShow">
+        222222
+    </h2>
+</transition-group>
+```
+
+如果同出现，同消失，那么可以使用一个div盒子进行嵌套，然后用transition标签包裹就行
+
+如果是两个互斥的，那么必须像上面那个写的一样，使用transition-group标签
+
+
+
+引入样式，在<script></script>中直接写import '文件名'
+
+比如 impor 'animate.css'
+
+其基础使用，在原生标签class='需要的样式'，例如 
+
+```html
+<h1 class="animate__animated animate__bounce">An animated element</h1>
+```
+
+如果是transition标签那么是他的name="animate_ _animated animate__bounce"
+
+如果使用的animate库
+
+```html
+<transition 
+        name="animate__animated animate__bounce" 
+        enter-active-class="animate__swing"
+        leave-active-class="animate__backOutUp"
+        appear
+      >
+          <h1 v-show="isShow" >你好啊！</h1>
+      </transition>
+```
+
+name相当于要选择的类名，然后enter...和leave...分别是进入和离开的样式，就无需自己再写
+
+
+
+总结：
+
+作用：在插入，更新或移除DOM元素时，在合适的时候给元素添加样式类名
+
+<img src="Vue.assets/image-20230826163255019.png" alt="image-20230826163255019" style="zoom:80%;" />
+
+
+
+写法：1.样式准备（如果有第三方动画库，那么就不需要）
+
+- 元素进入时样式
+    1. v-enter:进入的起点
+    2. v-enter-active：进入过程中
+    3. v-enter-to：进入的终点
+- 元素离开时的样式
+    1. v-leave：离开的起点
+    2. v-leave-active：离开过程中
+    3. v-leave-to：离开的终点
+
+2.使用`<transition>`包裹要过度的元素，并且配置name属性
+
+```html
+<transition name='ChiChengL'>
+	<h1 v-show="isShow">
+        你好
+    </h1>
+</transition>
+```
+
+如果有多个元素需要过度，则要使用`<transition-group>`，且每个元素都要指定key值.
+
+`谁想要动画，谁想要过度就给谁加`
+
+
+
+## Vue上的Ajax
+
+### 配置代理（解决跨域问题）
+
+请求方式：1.xhr   new XMLHttpRequest()            xhr.open()        xhr.send()
+
+2.jQuery          $get       $post
+
+3.axios（最多）
+
+4.fetch
+
+
+
+axios处理跨域问题
+
+1.cors解决跨域，让后端配置特定响应头。
+
+2.jsonp，利用script的src请求数据不受同源限制（很少，因为只能解决get，且前后端都要配合）
+
+3.代理服务器，类似于中介。同源策略管不到两个服务器之间的交流
+
+​	借助1.nginx或者`vue-cli`开启代理服务器
+
+#### 一
+
+在vue.config.js文件里面添加一个
+
+```js
+devServer:{
+    proxy:'http://localhost:5000'
+}
+```
+
+开启代理服务器，服务器的端口为8080，和服务器5000通信。
+
+这样配置简单，但是缺点也明显，只能配置一个服务器
+
+然后通过axios实现
+
+```js
+axios.get('http://localhost:8080/students').then(
+    res =>{
+        console.log(res.data)
+    },
+    err =>{
+        console.log(err.message)
+    }
+)
+```
+
+axios存在两个回调，response是成功后的回调，error是失败后的回调。
+
+如果请求的代理服务器上面有student就可以不用再去访问5000服务器，而直接使用自身的，如果没有再去请求其他的
+
+在public文件夹下面的内容相当于代理服务器的根路径，它里面有什么资源服务器就有什么
+
+
+
+
+
+#### 二
+
+在vue.config.js里面写
+
+```js
+devServer: {
+    proxy:{
+      '/api':{
+        target:'http://localhost:5000',
+        pathRewrite:{'^/api':''}
+        ws:true,
+        changeOrigin:true,
+      }
+    }
+  },
+```
+
+'/api'叫做请求前缀。如果想请求代理那么在前面加一个'/api'，如果不想就不加
+
+target是指，满足请求前缀是api那么就向http://localhost:5000 发送请求
+
+请求前缀是放在端口号后面的。那么在axios.get请求的地址应该这样子写`http://localhost:8080/api/students`
+
+这样当我们本地的8080向代理服务器8080发送请求，然后再由该服务器向5050发送请求，其后缀地址`都是/api/students`，但是5050服务器没有前面这个，只有/students
+
+因此要`pathRewrite配置`，pathRewrite:{'^/atguigu':''}匹配正则，匹配以每个/atguigu开头都换做''（空字符串）
+
+这里ws是用于支持websocket
+
+changeOrigin：false，用于控制请求头中的host值，也就是来之哪，是指在目标服务器，向代理服务器询问时，询问其来源，如果值为false，那么就告诉他真实的来源也就是来自8080代理服务器；如果为true，那么就是一个捏造的地址（就和目标服务器一样的地址）
+
+在vue中，ws和changeOrigin默认为true ，React里面changeOrigin是默认为false
+
+
+
+方法一：
+
+优点：配置简单，请求资源时直接发给前端（8080）即可。
+
+缺点：不能多项配置，不能灵活的控制请求是否走代理
+
+当请求了前端不存在的资源时，那么该请求会转发给服务器
+
+
+
+方法二：
+
+```js
+module.exports ={
+    devServer:{
+		proxy:{
+			'/api':{//匹配所有以'/api'开头的请求代理路劲
+            	target:'http://localhost:5000',//代理目标的基础路劲
+                pathRewrite:{'^/api':''},
+                changeOrigin:true
+        	}
+        }
+    }
+}
+```
+
+changeOrigin设置为true，服务器收到的请求头中的host时，localhost:5000（它本身）
+
+changeOrigin设置为false，服务器收到的请求头中的host时，localhost:8080（发起请求的地址）
+
+其值默认为true
+
+
+
+
+
+### github用户搜索案例
+
+如果引入的某个库，引用了其他地方的（且本地不存在的）资源，那么这个不推荐放入assets里面，因为会报错。比如导入bootstrap.css这个弹窗，不能将其放在assets中
+
+那么可以放在public文件夹中，然后让index引入，这样就不会报错。
+
+可以使用全局事件总线或者消息订阅与发布
+
+
+
+### 常用两个库
+
+#### 一、axios
+
+```
+npm i axios
+```
+
+引用
+
+```js
+import axios from 'axios'
+
+axios.get('url').then(
+	res =>{
+        
+    },
+    err =>{
+        
+    }
+)
+```
+
+
+
+
+
+#### 二、vue-resource（不推荐，有更优秀的axios）
+
+安装
+
+```
+npm i vue-resource
+```
+
+使用：
+
+先引用
+
+```js
+import vueResource from 'vue-resource'
+
+Vue.use(vueResource)
+```
+
+使用Vue.use全局使用vue-resource该插件
+
+再使用： this.$http.get('url')
+
+
+
+### 插槽
+
+<slot></slot>这个标签，放在组件里面，然后就可以在app使用组件的时候包裹其他东西了
+
+比如：<Category><img src='ht tps://s3.ax1x.com/2021/01/16/srJlq0.jpg'></Category>
+
+在Category组件里面的某个位置加上<slot>sda</slot>，那么就能将这个img插入进去了，如果在这个标签中间出现一些值，那么当没有使用插槽时，那么就会出现这些值，sda。使用了的话那么就不会出现
+
+#### 默认插槽
+
+app.vue
+
+```html
+<Category title="美食" >
+      <img src='https://s3.ax1x.com/2021/01/16/srJlq0.jpg'>
+ </Category>
+```
+
+category.vue
+
+```html
+<slot></slot>
+```
+
+
+
+
+
+#### 具名插槽（具有名字的插槽）
+
+适用于出现多个插槽的场景
+
+比如<img src='ht tps://s3.ax1x.com/2021/01/16/srJlq0.jpg' slot="center">
+
+然后再category.vue里面写 <slot name="center"></slot>
+
+可以让多个元素追加到一个插槽中，比如
+
+```html
+<a slot='footer' src='111'>单机游戏</a>
+<a slot='footer' src='111'>网络游戏</a>
+```
+
+<template slot="footer"></template>          可以写成         <template v-slot:footer></template>
+
+
+
+
+
+#### 作用域插槽
+
+数据不变，但是使用数据生成的结构要改变。
+
+数据在组件里面，但是需要在组件使用者上使用数据。
+
+<slot :game="game">默认内容</slot>
+
+这样会向使用插槽的组件传递game数据，需要将使用这些接收数据的外侧包裹<template scope></template>标签
+
+比如在app里面使用category组件
+
+```html
+<Category title="游戏">
+	<template scope="game">
+    	<ul>
+            <li v-for="(g,index) in game" :key="index">{{g}}</li>
+        </ul>
+    </template>
+</Category>
+<Category title="游戏">
+	<template scope="game">
+    	<ol>
+            <li v-for="(g,index) in game" :key="index" style="color:red">{{g}}</li>
+        </ol>
+    </template>
+</Category>
+```
+
+然后在category组件里面
+
+```vue
+<template>
+	<div>
+        <h3>{{title}}分类</h3>
+        <slot :games="games">默认内容</slot>
+    </div>
+</template>
+<script>
+	export default{
+        props:['title'],
+        data(){
+            return {
+                games:['LOL','CF','CS:GO']
+            }
+        }
+    }
+</script>
+```
+
+可以根据使用者的喜好更改结构，数据存储在被使用的组件里面的
+
+
+
+总结：
+
+作用：让父组件向子组件指定位置插入html结构
+
+作用域插槽，数据在组件本身，但其结构需要组件的使用者来决定
+
+
+
+## vuex
+
+### 简介
+
+是什么：专门在Vue中实现集中式状态（数据）管理的一个Vue插件，对Vue中多个组件的共享状态进行集中式的管理（读/写），也是一种组件间通信的方式，且适用于任意组件间的通信
+
+github地址：https://github.com/vuejs/vuex
+
+其实多组件共享数据全局总线事件也能实现
+
+<img src="Vue.assets/image-20230827210147714.png" alt="image-20230827210147714" style="zoom:50%;" />
+
+只不过稍微复杂。
+
+使用vuex，相当于一个超级源点，共享且能更改的数据放在vuex上
+
+使用场景：1.多个组件依赖同一状态				2.来自不同组件的行为需要变更同一状态
+
+工作原理
+
+<img src="Vue.assets/image-20230827214845956.png" alt="image-20230827214845956" style="zoom:67%;" />
+
+
+
+#### 使用
+
+操作：
+
+1.npm i vuex（默认安装最新版）								2.Vue.use(Vuex)					3.store （管理Actions，Mutations，State）					4.vc能看见store
+
+在Vue2中只能使用vuex的3版本；在Vue3中用的vuex的4版本
+
+要安装3版vuex，需要 npm i vuex@3
+
+然后引用并且使用，在main.js里面
+
+```js
+import Vue from 'vue'
+import App from './App'
+import Vuex from 'vuex'
+Vue.use(Vuex)
+
+new Vue({
+    el:'#app',
+    name:'App',
+    store:{}
+})
+```
+
+真正的使用是在src里面创建store文件夹，然后在其中创建一个index.js
+
+不管import写在哪都是优先执行的，然后安装各个import的顺序来执行 
+
+切记，要在创建store实例之前使用Vue.use(Vuex)
+
+搭建vuex环境
+
+创建：src/store/index.js
+
+```js
+ //该文件用于创建Vuex中最为核心的store
+// 引入Vuex
+import Vuex from 'vuex'
+// 引入Vue
+import Vue from 'vue'
+// 应用Vuex插件
+Vue.use(Vuex)
+//actions用于响应组件中的动作
+const actions = {}
+//mutations用于操作state中的数据
+const mutations = {}
+//state用于保存数据
+const state = {}
+
+//创建并且暴露store
+export default new Vuex.Store({
+    actions,
+    mutations,
+    state
+})
+```
+
+在main.js创建vm时，传入store
+
+```js
+import Vue from 'vue'
+import App from './App.vue'
+//引入vue-resource插件
+import vueResource from 'vue-resource'
+// 引入store
+import store from './store'//因为默认路劲就是./store/index.js
+Vue.config.productionTip = false
+//使用插件
+Vue.use(vueResource)
+
+new Vue({
+  render: h => h(App),
+  store,
+  beforeCreate() {
+    Vue.prototype.$bus = this
+  }
+}).$mount('#app')
+```
+
+其使用，比如在myCount组件里面调用就是
+
+```js
+methods:{
+	increment(){
+        this.$store.dispatch('jia',this.n)
+    }
+}
+```
+
+然后在index.js里面直接调用
+
+```js
+const actions ={
+    jia(context,value){
+        context.commit('JIA',value)//这里context是指的上下文
+    }
+}
+const mutations ={
+    JIA(state,value){
+        state.sum +=value
+    }
+}
+const state = {
+    sum:0
+}
+```
+
+这里需要经过四个阶段，Dispatch（发起动作的申请），Commit（提交要执行的函数），Mutate（修改），Render（渲染）
+
+如果在actions里面的逻辑非常简单，那么可以不经过dispatch，直接去commit
+
+比如上文的jia
+
+```js
+increment(){
+    this.$store.commit('JIA',this.n)
+}
+......
+//然后在actions里面就不用写jia这个函数了
+```
+
+在浏览器开发者工具Vue里面的第二栏，如果清楚一个mutation是可以回到调用这个之前的数据的，如果该次是在中间被删去，那么`后面依赖它产生的数据就无法呈现`，也就是会随着他的离开而离开
+
+如果点击合并，那么会将其本身及之前的mutation一同消失，然后化为base state里面的数据
+
+![image-20230828132748314](Vue.assets/image-20230828132748314.png)
+
+左边是合并，中间是消去，右边是回到这个动作之后
+
+上下文context里面有commit，dispatch还有state
+
+如果在actions里面直接修改会导致不进入mutations，因此开发者工具无法检测到
+
+如果逻辑比较复杂那么就需要预先处理在actions里面，然后再执行之后的代码 
+
+
+
+getters
+
+在store.js中追加getters配置,getters是为了响应式的得到state里面的经过加工的属性的
+
+```js
+......
+const getters = {
+    bigSum(state){
+        return state.sum*10
+    }
+}
+
+//创建并且暴露store
+export default new Vue.Store({
+    getters
+})
+```
+
+如果感觉频繁的写$store.state.sum这样的东西很麻烦，可以在计算属性里面直接写sum(){return this.$store.state.sum}
+
+倘若是getter里面的东西也是直接写就行bigSum(){return this.$store.getter.bigSum}
+
+### Map
+
+#### mapState和mapGetters
+
+`map得到的是一个对象`
+
+重复的写this.$store.state，其实可以用东西简化，也就是mapState
+
+``` js
+import {mapState} from 'vuex'
+```
+
+ 比如你在计算属性里面写
+
+```js
+computed(){
+	sum(){
+        return this.$store.state.sum
+    },
+    subject(){
+        return this.$store.state.subject
+    },
+    school(){
+        return this.$store.state.school
+    }
+}
+```
+
+重复部分相当多那么此时就可以使用mapState了
+
+```js
+computed(){
+    ...mapState({sum:'sum',school:'school',subject:'subject'})
+},
+```
+
+这样等同于上面的东西，它这是借助mapState生成计算属性，从state中读取数据（对象写法）。这里能简写吗？`大咩`，因为简写比如{sum}得到的是，{sum:sum}，前面那个可以自动转化为字符串形式，但是后面的那个相当于一个变量，去查找sum，没有找到因此会报错。故还是只能写成{sum:'sum'}这种形式（对象写法）
+
+还可以是数组写法
+
+```js
+computed(){
+    ...mapState(['sum','school','subject'])
+}
+```
+
+比如这个sum，它是计算属性的名字，也是this.$store.state.`xxx`中后面跟的xxx
+
+
+
+还有mapGetters用法和mapState一样，只不过对应的东西不一样 
+
+mapState是帮助我们映射state里面的数据为计算属性
+
+mapGetters是帮助我们映射getters里面的数据为计算属性
+
+
+
+#### mapActions和mapMutations
+
+如果事件不写括号默认为传入的是事件作为参数
+
+利用mapMutations生成的函数有参数且只有一个
+
+```js
+computed(){
+    ...mapMtations({increment:'JIA'})
+}
+
+......//相当于下面
+increment(value){
+    this.$store.commit('JIA',value)
+}
+```
+
+如果不传参，那么默认传入的value就是事件函数，因此若要正常使用那么，在调用时要用value  
+
+借助mapMutations生成对应的方法，方法中会调用commit去联系mutations
+
+同样他也有数组写法：当它的方法名和commit里面的名字都相同的时候就可以使用这个，比如
+
+```js
+...mapMutations(['sum'])
+```
+
+相当于生成了sum(){this.$store.commit('sum',value)}，这个value是调用函数时传入进来的
+
+mapActions和上面相类似，它生成的方法会调用dispatch，去联系Actions，有对象写法和数组写法。
+
+
+
+这四个mapState，mapGetters，mapMutations，mapActions都需要传入值的参数来进行，就是在调用那里
+
+```html
+<button @click="incrementOdd(n)">
+    当前和为奇数才加
+</button>
+```
+
+`传入n值`，不然也会出错。
+
+
+
+### vuex的模块化和namespace
+
+模块化，将服务每个不同功能的进行包装
+
+之前的store分布是混乱无序的，通过模块化来进行处理，即 modules:{}
+
+比如
+
+```js
+const countOptions={
+    actions:{},
+    mutations:{},
+    state:{},
+    getters:{}
+}
+
+const personOptions={
+    actions:{},
+    mutations:{},
+    state:{},
+    getters:{}
+}
+
+//然后在创建的时候又有些不同了
+
+export default new Vuex.Store({
+    modules:{
+        count:countOptions,
+        person:personOptions
+    }
+})
+```
+
+当然这样子也可以简写 
+
+
+
+如果模块化之后，那么之前直接用mapState的内容应该改变，因为里面只有count和person了，...mapState(['count','person'])
+
+那么之前使用也要更改
+
+```html
+<h1>
+    当前求和为:{{count.sum}}
+</h1>
+```
+
+应该改为这样子。但是这个count.xxx很麻烦而且之前的内容还要修改
+
+如果不想改动template里面的内容可以使用namespaced，来声明
+
+比如在count配置项里面写这个
+
+```js
+const count ={
+    namespaced:true,
+    .....
+}
+```
+
+namespaced默认为false，这样写了之后，就还可以像之前那样操作了
+
+```js
+computed:{
+	...mapState('count',['sum','school','subject'])
+}
+```
+
+加个名字就方便很多，而且不用更改html里面的元素。
+
+其他mapGetters,mapMutations,mapActions里面也是这样子操作，加个`操作/属性`所在的配置项里面的名字即可
+
+如果模块化了需要拿里面的东西应该是这样子，this.$store.state.count.sum
+
+因为配置了两个的话，他有两个选项，一个是count，一个是person里面都有东西
+
+如果要使用mutations里面的方法那么需要稍微做出调整
+
+```js
+methods:{
+    add(){
+        const personObj = {id:nanoid(),name:this.name}
+        this.$store.commit('person/ADD_PERSON',personObj)
+    }
+}
+```
+
+这里/前面是分类名，后面才是函数名
+
+在使用Getters的时候，也要写成上面那种路劲形式`this.$store.getters[person/firstPersonName]`
+
+如果使用mapGetters就不用这样子写直接写成  ...mapGetters('person',['firstPersonName  '])
+
+dispatch也要这样 `this.$store.dispatch('person/addPersonWang',personObj)`
+
+
+
+总结：
+
+目的：让代码更好维护，让多种数据分类更加明确
+
+修改store.js
+
+模块化后记得开启命名空间，这样比较方便取出数据和方法
+
+ ```js
+export default new Vuex.Store({
+    modules:{
+        xxx1:xxx1,
+        xxx2:xxx2
+    }
+})
+ ```
+
+3.开启命名空间后从组件中读取state数据
+
+```js
+//一，自行读取
+this.$store.state.person.personlist
+//二：借助mapState读取
+...mapState('count',['sum','school','subject'])
+```
+
+4.开启命名空间后，组件中读取getters数据：
+
+```js
+//自行读取
+this.$store.getter['person/firstPersonName']
+//借助map读取
+...mapGetters('count',['bigSum'])
+```
+
+5.开启命名空间后，组件中调用dispatch
+
+```js
+//自行调用
+this.$store.dispatch('person/addPersonWang',person)
+//借助mapActions
+...mapActions('count',{incrementOdd:'incrementOdd',incrementWait:'incrementWait'})
+```
+
+6.开启命名空间，组件调用commit
+
+```js
+//自行调用
+this.$store.commit('person/ADD_PERSON',person)
+//借助mapMutations
+...mapMutations('count',{increment:'increment',decrement:'decrement'})
+```
+
+这里不能简写，因为简写后成了increment:increment，前面会自动转换为字符串，都是后面是个变量，但是我们又没有定义该变量故不可以。
+
+
+
+## Vue上的路由
+
+### 简介（相关理解）
+
+路由：`一组key-value对应关系`，比如key1+value1 ==>路由，route
+
+路由器：多个路由，需要经过路由器的管理，router
+
+路由是为了SPA（single page web application）应用
+
+单页面路由，部分区域随着点击的应用不同来展示不同的内容  
+
+vue-router时时刻刻都在监视着链接的变化，通过route规则：/class =>展示班级组件
+
+vue-router是vue的一个插件库，专门用来实现SPA应用，使用先下载npm i vue-router
+
+对SPA的理解：
+
+​	单页web应用，一个页面就能完成许许多多内容
+
+​	整个应用只有一个完整的页面
+
+​	3.点击页面中的导航链接不会刷新页面，只会做页面的`局部更新` 
+
+​	4.数据需要通过ajax请求获取
+
+一个路由就是一组映射关系（key-value）
+
+key为路径，value是function或component
+
+路由分类：
+
+​	1.后端路由：
+
+​		1）理解：value就是function，用于处理客户端提交的请求
+
+​		2）工作过程：服务器接收到一个请求时，根据请求路劲找到匹配的函数来处理请求，返回响应数据
+
+​	2.前端路由
+
+​		1）理解：value就是component，用于展示页面内容
+
+​		2）工作过程：当浏览器的路径改变时，对应的组件就会显示
+
+### 基本路由
+
+#### 基础
+
+vue-router默认是最新版本，vue-router3才能在vue2中使用，而vue-router4只能在vue3中使用
+
+```
+npm i vue-router@3
+```
+
+安装指定的3版本
+
+```js
+import VueRouter from 'vue-router'
+
+Vue.use(VueRouter)
+
+new Vue({
+    render:h =>h(App),
+    router:{}
+})
+```
+
+使用完插件可以在vue里面配置一个router项
+
+一般会在src里面配置一个router文件夹，在其内容存在一个专门用于创建整个应用的路由器index.js
+
+如果想实现跳转路径，那么就不能是a标签而是，VueRouter提供的router-link
+
+<router-link to="/地址"></router-link>
+
+```vue
+<router-link class="list-group-item" to="/about" active-class="active">About</router-link>
+<router-link class="list-group-item" to="/Home" active-class="active">Home</router-link>
+```
+
+不能写相对路径那种样式，即./xxx这样
+
+如果想要点击哪个，哪个就激活active样式的话还可以加上active-class="active"
+
+最后在展示位置，放一个<router-view></router-view>标签，就可以切换不同内容了
+
+
+
+编写router配置项：
+
+```js
+// 专门用于创建整个应用的路由器
+import VueRouter from 'vue-router'
+//创建一个路由器
+import About from '../components/myAbout.vue'
+import Home from '../components/myHome.vue'
+const router = new VueRouter({
+    routes: [
+        {
+            path: '/about',
+            component: About
+        },
+        {
+            path: '/home',
+            component: Home
+        }
+    ]
+})
+export default router
+```
+
+实现切换（active-class可配置高亮样式）
+
+```html
+<router-link active-class='active' to="/about"></router-link>
+```
+
+指定展示位置：（类似于插槽占位）
+
+```html
+<router-view></router-view>
+```
+
+#### 注意点： 
+
+如果引用并注册一个组件，并且亲自写了组件标签的那么就是一般组件，而路由组件，是在路由器里面引用的，且没有写组件标签
+
+一般在pages文件夹里面放置路由组件，在components里面放一般组件
+
+切换走的组件其实是`被销毁了`，而非隐藏（路由组件）
+
+路由组件的实例对象里面多了两个东西，$route和$router，每个路由组件的route不一样但是router是一样的，因为只有一个路由器进行管理。$route存储着自己的路由信息，整个应用只有一个router，可以通过组件的$router属性获取到
+
+
+
+### 嵌套（多级）路由
+
+在一级路由里面多一个children配置项（数组），其里面就是二级路由
+
+```js
+export default new VueRouter({
+    routes:[
+        {
+            path:'/about',
+            component:About,
+            children:[
+                {
+                    path:'information',
+                    component:Information
+                }
+            ]
+        }
+    ]
+})
+```
+
+像这样的information组件就是二级路由。
+
+注意：某个路由下的子路由的path`不需要`再写/，底层遍历时会自动加上，/因此不用自己再加
+
+配置规则：
+
+```js
+// 专门用于创建整个应用的路由器
+import VueRouter from 'vue-router'
+//创建一个路由器
+import About from '../pages/myAbout.vue'
+import Home from '../pages/myHome.vue'
+const router = new VueRouter({
+    routes: [
+        { 
+            path: '/about',
+            component: About
+        },
+        {
+            path: '/home',
+            component: Home,
+            children: [
+                {
+                path: 'news',
+                component:() => import('@/pages/myNews.vue')
+                },
+                {
+                path: 'message',
+                component:() => import('@/pages/myMessage.vue')
+                },
+            ]
+        }
+    ]
+})
+export default router
+```
+
+跳转要注意，写完整路径：
+
+```html
+<router-link to="/home/news">News</router-link>
+```
+
+
+
+
+
+### 路由传参
+
+<router-link to="/home/message/detail?id=666&title=你好啊"></router-link>
+
+前面就是目标地址，即目标哪个组件。后面是携带的query参数。
+
+然后在detail组件里面可以使用$route来接收参数
+
+通过$route.query.id来实现
+
+实际传参需要，绑定数据，而且要先用模板字符串再用""包裹，例如
+
+跳转路由并且携带query参数，to的字符串写法
+
+```html
+<router-link :to="`/home/message/detail?$id={m.id}&title=${m.title}`">{{m.title}}</router-link>&nbsp;&nbsp;
+```
+
+跳转路由并且携带query参数，to的对象写法
+
+ ```html
+<router-link :to="{
+                  path:'/home/message/detail',
+                  query:{
+                  	id:m.id,
+                  	title:m.title
+                  }
+                  }">{{m.title}}</router-link>
+ ```
+
+to可以写成对象形式
+
+接收参数：
+
+```js
+$route.query.id
+$route.query.title
+```
+
+一般需要收到参数的时候才写成对象形式
+
+#### 命名路由
+
+可以简化跳转
+
+路由可以配置名字，添加一个name属性就行，给谁起名字就把name写在配置项里面，
+
+如果知道路由的名字那么就可以简化编码。
+
+比如跳转路由时，必须写全路径例如上面那个router-link标签，像三级路由必须带着一二级的路由的路径。
+
+但是使用name就会方便很多，比如明明是 
+
+```html
+<router-link :to="{path:'/home/message/detail'}"></router-link>
+<!-- 可以替换成下面的形式 -->
+<router-link :to="{name:'detail'v }"></router-link>
+```
+
+但是不好的点就在于它需要写成对象的形式
+
+#### params参数
+
+跳转路由并携带params参数，to的字符串写法
+
+```html
+<router-link :to="`/home/message/detail/${m.id}/${m.title}`"></router-link>
+```
+
+这里需要明确一下，如果不给detail路由配置一些东西的话，它默认向四五级路由跳转
+
+配置的东西是
+
+```js
+{
+    name:'detail',
+    path:'detail/:id/:title',
+   	...
+}
+```
+
+主要是在path里面配置占位符，以明确传入的参数是什么，不让其当作低一级的路由进行跳转。
+
+如果是跳转路由并且携带params参数的对象写法，那么`只能用name配置项`，而不能用path配置项
+
+```html
+<router-link :to="{
+                  name:'detail',
+                  params:{
+                  	id:m.id,
+                  	title:m.title
+                  	}
+                  }">
+</router-link>
+```
+
+配置路由时，需要使用占位的形式去接收params参数
+
+接收参数：$route.params.id 
+
+
+
+#### 路由的props配置
+
+谁接收给谁配置，比如detail路由接收
+
+```js
+{
+    name:'detail',
+   	//props的第一种写法，值为对象，该对象中的所有key-value都会以props的形式传给Detail组件 
+    props:{a:1,b:'hello'}
+}
+```
+
+这种写法传递的是死数据不能更改
+
+接收,在detail.vue组件里面
+
+```js
+export default {
+    props:['a','b']
+}
+```
+
+
+
+第二种写法：值为布尔值，若布尔值为真，就会把该路由组件收到的所有params参数，以props的形式传给Detail组件。
+
+```js
+{
+    props:true
+}
+```
+
+如果是query那么根本就接收不到，因此这种写法只能接收params
+
+
+
+第三种写法：值为函数，能接收到$route，返回对象中每一组key-value都会通过props传给detail组件
+
+```js
+{
+    name:'detail',
+    /*props($route){
+        return {
+            id:$route.query.id,
+            title:$route.query.title
+        }
+    }*/
+    props({query:{id,title}}){
+        return{id,title}
+    }//结构赋值的连续写法
+}
+```
+
+接收和上面相类似
+
+```js
+export default {
+    props:['id','title']
+}
+```
+
+#### `<router-link>的replace属性`
+
+给组件标签添加一个:replace="true",可以让点击路由组件的时候，替换掉前进后退栈的栈顶
+
+浏览器的李四记录有两种写入方式，分别是push和replace，push是追加历史记录，replace是替换当前记录。路由跳转的时候默认为push。
+
+开启replace模式，`<router-link :replace="true"></router-link>`，也可以写成 replace就行，因为replace默认值就是true，意思是点击这个组件，然后跳转之后这个页面是替代了之前历史的栈顶的
+
+
+
+
+
+### 编程式路由导航
+
+不借助<router-link></router-link>的导航。 
+
+比如，点击之后经过几秒钟才跳转。
+
+那么此时就能用到编程式路由了，这里需要一个东西`$router`借助它上面的原型对象的方法，可以轻松跳转
+
+push()和replace()，push是跳转的时候将当前页面压入栈顶，replace是替换当前的栈顶。
+
+比如
+
+```js
+methods:{
+    pushShow(m) {
+      this.$router.push({
+        name: 'detail',
+          query: {
+            id: m.id, 
+            title: m.title
+          }
+       })
+    }
+}
+```
+
+而且可以使用定时器进行包裹，使其想什么时候跳转就什么时候跳转
+
+然后前进后退可以用$router原型对象上面的bakc()和forward()
+
+还有一个特殊的api，go(n)当n为`正数`，浏览器是前进n步；n为负数，浏览器是后退n步
+
+
+
+每次切换组件到兄弟组件时，之前的组件总是被销毁。
+
+倘若不想销毁那么可以将展示路由组件的标签放在<keep-alive></keep-alive>里面，使其跳转到其他路由组件时不被销毁，但是如果不加一个配置项那么就会全部保存下来，使用include="组件名"，就意味着`只是`这个组件名的实例对象的内容不会消失
+
+```html
+<keep-alive include="News">
+	<router-view></router-view>
+</keep-alive>
+```
+
+如果缓存多个，  那么应该写成  :include="['News','Message']"
+
+
+
+如果在挂载周期mounted上开启了一个定时器，且缓存了该组件，那么
+
+相当于beforeDestroy钩子不起作用，也就关闭不了这个定时器了
+
+
+
+因此专属路由组件的两个生命周期钩子出现了，activated()和deactivated()，分别对应着组件的激活与失活
+
+
+
+### 路由守卫
+
+作用：对路由进行权限控制
+
+#### 全局前置路由
+
+```js
+const router = new VuexRouter({})
+
+router.beforeEach((to,from,next)=>{
+    console.log(to)
+    console.log(from)
+    if(to.path==='/home'){
+        next()//执行了之后就可以进行跳转
+    }
+})
+
+export default router
+```
+
+在每一次切换`之前`/初始化时，执行这个beforeEach函数，这是全局前置路由守卫 ，他会接收三个参数，to，from和next
+
+to是指去哪，from是来自哪，next是"放行"，让其跳转
+
+如果想在路由里面添加一些自己的配置，需要在路由的meta里面放
+
+比如放一个isAuth，然后让前置路由进行校验，是否需要判断这些，从而控制跳转
+
+```js
+const router = new VueRouter({
+    routes:[
+        {
+            path:'/about',
+            meta:{
+                isAuth:false
+            },
+            component:()=> import('@/pages/about.vue'),
+            children:[
+            {
+            	path:'news',
+            	component:()=>import('@/pages/News.vue'),
+    			meta:{
+    				isAuth:true
+				}
+        	}
+            ]
+        }
+    ]
+})
+
+router.beforeEach((to,from,next)=>{
+	if(to.meta.isAuth){//需要进入判断条件
+        if(localStorage.getItem('school')==='atguigu'){
+            next()//放行
+        }else{
+            alert('无权限查看')
+        }
+    }else{
+        next()
+    }
+})
+```
+
+#### 全局后置路由守卫
+
+初始化的时候被调用，每次路由切换`之后`被调用
+
+```js
+router.afterEach((to,from)=>{
+    console.log('后置路由守卫',to,from)
+})
+```
+
+切换完成后调用 。（PS：很少用）
+
+比如，需要在切换路由后，更改页面的title，那么就可以放在后置路由守卫里面，这样只用写一次就行 
+
+
+
+
+
+#### 独享路由守卫
+
+`只有独享（前置）路由守卫`，且独享前置路由守卫能与全局后置路由守卫配合
+
+只限制某一个路由，在路由里面添加beforeEnter配置项
+
+```js
+const router = new VueRouter({
+    routes:[
+        {
+            name:'Home',
+            path:'/home',
+            component:()=> import('@/pages/Home.vue')
+            children:[
+            	{
+    				name:'News',
+            		path:'new',
+            		component:() => import('@/pages/Home.vue'),
+    				meta:{isAuth:true},
+    				beforeEnter:(to,from,next)=>{
+    					console.log('独属于News的守卫')
+    					if(to.meta.isAuth){
+                            next()
+                        }
+					}
+        		}
+            ]
+        }
+    ]
+})
+```
+
+像上面这个就配置了一个独属于News的路由守卫
+
+
+
+#### 组件内路由守卫
+
+比如在About.vue里面的配置项，beforeRouteEnter(to,from,next),和beforeRouteLeave(to,from,next)，分别是进入组件时调用，和离开组件时调用。（都是在`通过路由规则`的前提下）
+
+比如像一般的组件引入，注册进入一个组件，就不算通过路由规则进入 
+
+比如在about组件里面：
+
+```js
+export default {
+    name:'About',
+    beforeRouteEnter(to,from,next){
+        
+    },
+    beforeRouteLeave(to,from,next){
+        
+    }
+}
+```
+
+
+
+
+
+#### hash模式和history模式
+
+地址那里#后面都算作hash值，其特点：不会作为路径的一部分发送给服务器
+
+路由器有两种工作模式，默认就是hash模式，可以在路由器的配置项里面进行更改，配置项为mode
+
+```js
+const router = new VueRouter({
+    mode:'history',
+    routes:[]
+})
+```
+
+默认为hash，当该为history时，就不会出现#
+
+我们写好的项目需要打包之后浏览器才能直接识别使用。
+
+在package.json里面的scripts项中，有serve和build项。
+
+运行项目产生的微型服务器就是通过 npm run serve获取的
+
+如果想要打包，那么需要 npm run build，最终生成一个dist文件夹，里面就是所需要的html，css，js文件 
+
+打包后的文件需要放在服务器上部署才能看见
+
+搭建一个服务器
+
+```
+npm init
+```
+
+然后输入小写的项目名字
+
+```
+npm i express
+```
+
+再创建server.js文件 
+
+```js
+ const express = require('express');
+
+ const app = express();
+ app.use(express.static(__dirname+'/static'))//这样就可以访问static下的一些文件了
+ app.get('/person',(request,response)=>{
+  response.send({
+    name:'Tom',
+    age:18
+  })
+ })
+
+ app.listen(5005,(err)=>{
+  if(!err) console.log('服务器启动成功')
+ })
+```
+
+如果有个index.html那么访问5005服务器的时候就直接是访问的这个index.html
+
+当在服务器下，刷新页面如果以前的是hash模式就不会出现问题，而history模式不行，因为，刷新的时候history模式是将后面的路径当作资源去重新请求，而hash的后面是当作一个hash值去看，刷新的时候不会再去请求服务器
+
+使用nodejs的中间间，使用connect-history-api-fallback 解决history模式下的404，
+
+这个是服务器的中间件   npm i connect-history-api-fallback
+
+然后再server.js里面引入，const history = require('connect-history-api-fallback');
+
+然后再使用history函数（要再使用express.static(__dirname+'/static')）
+
+```js
+ const express = require('express');
+ const history = require('connect-history-api-fallback');
+ const app = express();
+ app.use(history());
+ app.use(express.static(__dirname+'/static'))
+ app.get('/person',(request,response)=>{
+  response.send({
+    name:'Tom',
+    age:18
+  })
+ })
+
+ app.listen(5005,(err)=>{
+  if(!err) console.log('服务器启动成功')
+ })
+```
+
+这样就可以解决history模式的404问题 
+
+
+
+hash模式：
+
+​	地址中永远带着#号，不美观
+
+​	2.若以后将地址通过第三方手机app分享，若app校验严格，则地址会被标记为不合法
+
+​	3.兼容性较好
+
+history模式：
+
+​	1.地址干净，美观
+
+​	2.兼容性和hash模式相比略差
+
+​	3.应用部署上线时需要后端人员支持，解决刷新页面服务端404的问题
+
+
+
+## Vue UI组件库
+
+移动端常用UI组件库
+
+1.Vant                              2.Cube UI 															3.Mint UI             					4.NUT UI
+
+PC端常用UI组件库
+
+1.Element UI（基于Vue） 												IView UI
+
+主要是Element UI
+
+
+
+在组件里看怎么安装
+
