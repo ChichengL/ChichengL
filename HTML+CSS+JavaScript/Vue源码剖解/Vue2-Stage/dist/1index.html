@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script src="./vue.js"></script>
+  <script>
+    // console.log(Vue); 
+    const vm = new Vue({
+      data:{
+        name:'1',
+        age:99,
+        object:{
+          address:'四川',
+          name:'张三'
+        },
+        hobby:['Drink','Eat',{a:1}]
+      }
+    })
+    // vm.object = {
+    //   num:20
+    // }
+    vm.hobby.push('Play');
+    vm.hobby.unshift({b:2});
+  </script>
+</body>
+</html>
