@@ -1,15 +1,16 @@
 import { initState } from "./state";
 import { compileToFunction } from "./compiler/index";
 import { mountComponent } from "./lifecycle";
+import { mergeOptions } from "./utils";
 export function initMixin(Vue){//给Vue 增加init方法
   Vue.prototype._init = function(options){//用于初始化操作
     //vue vm.$options 就是获取用户的配置 
     const vm = this; //
-    vm.$options = options;//把用户配置赋值给vm.,挂载到vm身上 使用$标识表示这是vue里面的
-    
+    vm.$options = mergeOptions(this.constructor.options,options);//把用户配置赋值给vm.,挂载到vm身上 使用$标识表示这是vue里面的
+    // callHook(vm,'beforeCreate');
     //初始化状态
     initState(vm);
-
+    // callHook(vm,'created');
     //判断是否由el属性
     if(options.el){
       vm.$mount(options.el);//挂载 
@@ -24,9 +25,7 @@ export function initMixin(Vue){//给Vue 增加init方法
       if(!op.template && el){//没有模版但是有el
          template = el.outerHTML;
       }else{
-        if(el){
           template = op.template;//如果有el则采用模版
-        }
       }
       // console.log(template);
       if(template){//存在模版就对模版进行编译

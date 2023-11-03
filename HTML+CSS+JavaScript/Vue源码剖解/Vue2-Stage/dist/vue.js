@@ -738,7 +738,7 @@
   }
   function codegen(ast) {
     var children = genChildren(ast.children);
-    var code = "_c('".concat(ast.tag, "',").concat(ast.attrs.length > 0 ? genProps(ast.attrs) : 'null').concat(ast.children.length > 0 ? ",".concat(children) : 'null', ")");
+    var code = "_c('".concat(ast.tag, "',").concat(ast.attrs.length > 0 ? genProps(ast.attrs) : 'null').concat(ast.children.length > 0 ? ",".concat(children) : ',null', ")");
     return code;
   }
   function compileToFunction(template) {
@@ -756,6 +756,10 @@
   }
 
   // h函数,_c函数都是调用这些
+
+  var isReservedTag = function isReservedTag(tag) {
+    return ["a", "ul", "ol", "li", "div", "span", "p", "img", "input", "button", "textarea", "h1", "h2", "h3", "h4", "h5", "h6", "table", "tr", "td", "th", "tbody", "thead", "tfoot", "tr", "th", "td", "select", "option", "form"].includes(tag);
+  };
   function createElementVNode(vm, tag, data) {
     if (data == null) {
       data = {};
@@ -764,10 +768,38 @@
     if (key) {
       delete data.key;
     }
+
+    //判断是否为原生标签
     for (var _len = arguments.length, children = new Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
       children[_key - 3] = arguments[_key];
     }
-    return VNode(vm, tag, key, data, children);
+    if (isReservedTag(tag)) {
+      return VNode(vm, tag, key, data, children);
+    } else {
+      //创建组件的虚拟结点
+      // 需要包含组件的构造函数
+      var Ctor = vm.$options.components[tag];
+      // Ctor可能是组件的定义，可能是一个Sub类，还有可能是组件的component选项
+      return createComponentVnode(vm, tag, key, data, children, Ctor);
+    }
+  }
+  function createComponentVnode(vm, tag, key, data, children, Ctor) {
+    if (_typeof(Ctor) === 'object') {
+      console.log(1);
+      Ctor = vm.$options._base.extend(Ctor); //将对象转化一下得到构造函数，_base声明于globalAPI上面的
+    }
+
+    data.hook = {
+      init: function init(vnode) {
+        //稍后创造真实节点的时候，如果是组件则调用此init方法
+        //保存组件的实例到虚拟节点
+        var instance = vnode.componentInstance = new vnode.componentOptions.Ctor();
+        instance.$mount();
+      }
+    };
+    return VNode(vm, tag, key, data, children, null, {
+      Ctor: Ctor
+    });
   }
 
   // _v
@@ -777,18 +809,30 @@
   // 创建虚拟DOM,和ast一样吗?
   // ast是做的语法上的转化,他描述的是语法本身(可以描述js css html)
   // 虚拟DOM是描述的dom元素,可以增加一些自定义属性(描述dom)
-  function VNode(vm, tag, key, data, children, text) {
+  function VNode(vm, tag, key, data, children, text, componentOptions) {
     return {
       vm: vm,
       tag: tag,
       key: key,
       data: data,
       children: children,
-      text: text
+      text: text,
+      componentOptions: componentOptions //组件的构造函数
     };
   }
+
   function isSameVnode(vnode1, vnode2) {
     return vnode1.tag === vnode2.tag && vnode1.key === vnode2.key;
+  }
+
+  function createComponent(vnode) {
+    var i = vnode.data;
+    if ((i = i.hook) && (i = i.init)) {
+      i(vnode);
+    }
+    if (vnode.componentInstance) {
+      return true; // 说明是组件
+    }
   }
 
   function createElm(vnode) {
@@ -798,10 +842,16 @@
       text = vnode.text;
     if (typeof tag === 'string') {
       //标签
+      //创建真实元素也要区分组件还是元素
+      if (createComponent(vnode)) {
+        //组件
+        return vnode.componentInstance.$el; //返回组件对应的真实元素
+      }
+
       vnode.el = document.createElement(tag); // 这里将真实节点和虚拟节点对应起来，后续如果修改属性了
       patchProps(vnode.el, {}, data); // 处理data
       children.forEach(function (child) {
-        vnode.el.appendChild(createElm(child));
+        vnode.el.appendChild(createElm(child)); //会将组件创建的元素，插入到父元素中
       });
     } else {
       //就是创建文本
@@ -840,6 +890,10 @@
   }
 
   function patch(oldVNode, vnode) {
+    if (!oldVNode) {
+      //这就是组件的挂载
+      return createElm(vnode); //vm.$el  对应的就是组件渲染的结果了
+    }
     //初渲染和后面的diff渲染一样的
     var isRealElement = oldVNode.nodeType; //nodeType是js原生属性,如果是元素节点的那么值就是1
     if (isRealElement) {
@@ -990,7 +1044,14 @@
       var vm = this;
       var el = vm.$el;
       //这里vnode是虚拟节点,是真实节点
-      vm.$el = patch(el, vnode); //使用vnode,更新出真正的dom
+      var preVnode = vm._vnode;
+      vm._vnode = vnode; //把组件第一次产生的虚拟节点保存到_vnode上
+      if (preVnode) {
+        //之前渲染 
+        vm.$el = patch(preVnode, vnode);
+      } else {
+        vm.$el = patch(el, vnode); //使用vnode,更新出真正的dom
+      }
       //patch既有初始化的功能,又有更新的功能
     };
 
@@ -1027,17 +1088,51 @@
     // console.log(watcher);
   }
 
+  function mergeOptions() {
+    var ops = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var mixin = arguments.length > 1 ? arguments[1] : undefined;
+    // 创建一个空对象作为合并后的结果
+    var options = {};
+    // 定义一个合并策略对象，存放不同属性名对应的合并策略函数
+    var strats = {};
+    // 定义一个默认的合并策略函数，如果没有找到对应的策略函数，就使用它
+    var defaultStrat = function defaultStrat(parentVal, childVal) {
+      // 如果子选项有值，就使用子选项的值，否则就使用父选项的值
+      return childVal === undefined ? parentVal : childVal;
+    };
+    // 定义一个合并字段的函数，用于遍历属性并调用合并策略函数
+    function mergeField(key) {
+      // 根据属性名查找合并策略对象，如果没有找到，就使用默认的合并策略函数
+      var strat = strats.hasOwnProperty(key) ? strats[key] : defaultStrat;
+      // 调用合并策略函数，传入父选项和子选项的属性值，以及当前的属性名
+      options[key] = strat(ops[key], mixin[key], key);
+    }
+    // 遍历父选项的所有属性，并调用合并字段的函数
+    for (var key in ops) {
+      mergeField(key);
+    }
+    // 遍历子选项的所有属性，并调用合并字段的函数
+    for (var _key in mixin) {
+      // 如果父选项没有该属性，才需要调用合并字段的函数
+      if (!Object.hasOwn(ops, _key)) {
+        mergeField(_key);
+      }
+    }
+    // 返回合并后的结果对象
+    return options;
+  }
+
   function initMixin(Vue) {
     //给Vue 增加init方法
     Vue.prototype._init = function (options) {
       //用于初始化操作
       //vue vm.$options 就是获取用户的配置 
       var vm = this; //
-      vm.$options = options; //把用户配置赋值给vm.,挂载到vm身上 使用$标识表示这是vue里面的
-
+      vm.$options = mergeOptions(this.constructor.options, options); //把用户配置赋值给vm.,挂载到vm身上 使用$标识表示这是vue里面的
+      // callHook(vm,'beforeCreate');
       //初始化状态
       initState(vm);
-
+      // callHook(vm,'created');
       //判断是否由el属性
       if (options.el) {
         vm.$mount(options.el); //挂载 
@@ -1055,9 +1150,7 @@
           //没有模版但是有el
           template = el.outerHTML;
         } else {
-          if (el) {
-            template = op.template; //如果有el则采用模版
-          }
+          template = op.template; //如果有el则采用模版
         }
         // console.log(template);
         if (template) {
@@ -1074,6 +1167,55 @@
     };
   }
 
+  function initGlobalAPI(Vue) {
+    // config
+    var configDef = {};
+    configDef.get = function () {
+      return config;
+    };
+    Object.defineProperty(Vue, 'config', configDef);
+
+    // exposed util methods.
+    // NOTE: these are not considered part of the public API - avoid relying on
+    // them unless you are aware of the risk.
+
+    // 2.6 explicit observable API
+    Vue.observable = function (obj) {
+      observe(obj);
+      return obj;
+    };
+    Vue.options = Object.create(null);
+
+    // this is used to identify the "base" constructor to extend all plain-object
+    // components with in Weex's multi-instance scenarios.
+    Vue.options = {
+      _base: Vue
+    };
+    Vue.mixin = function (mixin) {
+      this.options = mergeOptions(this.options, mixin);
+      return this;
+    };
+    Vue.extend = function (options) {
+      //实现根据用户的参数返回一个构造函数
+      function Sub() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        //调用Vue的构造函数
+        this._init(options);
+      }
+      Sub.prototype = Object.create(this.prototype); //Sub.protoytype.__proto__ = Vue.protoType
+      Sub.prototype.constructor = Sub;
+      //将用户传递的参数和全局的Vue.options来合并
+      Sub.options = mergeOptions(Vue.options, options);
+      return Sub;
+    };
+    Vue.options.components = {}; //全局的指令  Vue.options.directives
+    Vue.components = function (id, definition) {
+      //如果是函数直接返回，不是函数就进行包装
+      definition = typeof definition === 'function' ? definition : Vue.extend(definition);
+      Vue.options.components[id] = definition;
+    };
+  }
+
   //将所有的方法耦合在一起
   function Vue(options) {
     //options就是用户的选项
@@ -1082,7 +1224,7 @@
 
   initMixin(Vue); //扩展了init方法 
   initLifeCycle(Vue); //扩展了生命周期方法
-
+  initGlobalAPI(Vue);
   initStateMixin(Vue); //实现了nextTick和$watch
 
   return Vue;

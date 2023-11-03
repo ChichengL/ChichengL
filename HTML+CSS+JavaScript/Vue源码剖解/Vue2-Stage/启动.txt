@@ -1,0 +1,5 @@
+npm init -y      进行初始化
+
+npm install rollup  rollup-plugin-babel @babel/core @babel/preset-env --save-dev  安装babel rollup等插件
+
+启动 npm run dev

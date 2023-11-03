@@ -1,12 +1,27 @@
 import { isSameVnode } from ".";
 
+function createComponent(vnode) {
+    let i = vnode.data
+    if((i = i.hook) && (i = i.init)){
+         i(vnode)
+    }
+    if(vnode.componentInstance){
+        return true // 说明是组件
+    }
+}
+
 export function createElm(vnode) {
     let { tag, data, children, text } = vnode;
     if (typeof tag === 'string') {//标签
+        //创建真实元素也要区分组件还是元素
+        if(createComponent(vnode)){
+            //组件
+            return vnode.componentInstance.$el//返回组件对应的真实元素
+        }
         vnode.el = document.createElement(tag);// 这里将真实节点和虚拟节点对应起来，后续如果修改属性了
         patchProps(vnode.el, {}, data);// 处理data
         children.forEach(child => {
-            vnode.el.appendChild(createElm(child));
+            vnode.el.appendChild(createElm(child));//会将组件创建的元素，插入到父元素中
         });
     } else {//就是创建文本
         vnode.el = document.createTextNode(text);
@@ -43,6 +58,10 @@ export function patchProps(el, oldProps = {}, props = {}) {
 }
 
 export function patch(oldVNode, vnode) {
+
+    if(!oldVNode){ //这就是组件的挂载
+        return createElm(vnode)//vm.$el  对应的就是组件渲染的结果了
+    }
     //初渲染和后面的diff渲染一样的
     const isRealElement = oldVNode.nodeType;//nodeType是js原生属性,如果是元素节点的那么值就是1
     if (isRealElement) {

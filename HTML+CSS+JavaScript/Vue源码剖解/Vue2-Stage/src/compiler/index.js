@@ -56,7 +56,7 @@ function genChildren(children){
 
 function codegen(ast){
   let children = genChildren(ast.children);
-  let code = (`_c('${ast.tag}',${ast.attrs.length > 0 ? genProps(ast.attrs) : 'null'}${ast.children.length > 0 ? `,${children}` : 'null'})`)
+  let code = (`_c('${ast.tag}',${ast.attrs.length > 0 ? genProps(ast.attrs) : 'null'}${ast.children.length > 0 ? `,${children}` : ',null'})`)
   return code;
 }
 
