@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../JS/vue.js"></script>
+</head>
+
+<body>
+  <div id="root">
+    姓：<input type="text" v-model="firstName"><br>
+    名：<input type="text" v-model="lastName"><br>
+    <!-- 姓名：<span>{{firstName.slice(0,3)}}-{{lastName}}</span> -->
+    姓名：<span>{{fullName}}</span>
+    <h2>天气很{{info}}</h2>
+    <button @click="toggle">切换天气</button>
+  </div>
+  <script>
+    Vue.config.productionTip = false
+    const vm = new Vue({
+      el: '#root',
+      data: {
+        firstName: '张',
+        lastName: '三',
+        isHot: true,
+        number:{
+          a:1,
+          b:{
+            c:{
+              d:1
+            }
+          }
+        }
+      },
+      methods: {
+        toggle () {
+          this.isHot = !this.isHot
+        }
+      },
+      computed: {
+        fullName: {
+          get () {
+            return this.firstName + '-' + this.lastName
+          },
+          set (value) {
+            const arr = value.split('-')
+            this.firstName = arr[0]
+            this.lastName = arr[1]
+          }
+        },
+        info: {
+          get () {
+            return this.isHot ? '炎热' : '凉爽'
+          },
+          set () {
+            this.isHot = !this.isHot
+          }
+        }
+      },
+      watch: {
+        //完整的写法
+        // isHot:{
+        //   // immediate:true,
+        //   // deep:true,
+        //   handler(newValue,oldValue){
+        //     console.log('isHot被修改了',newValue,oldValue)
+        //   }
+        // }
+        isHot(newValue,oldValue){
+          console.log('isHot被修改',newValue,oldValue)
+        },
+        number:{
+          deep:true,
+          handler(){
+            console.log('number被改变')
+          }
+        }
+      }
+    })
+    // vm.$watch('isHot',{
+      // immediate:true,//初始化时让handler调用一下
+      // handler(newValue,oldValue){
+      //     console.log('isHot被修改了',newValue,oldValue)
+      // }
+    // }) 
+     //重复调用函数，导致效率低
+     vm.$watch('isHot',function(){
+           console.log('isHot被修改了',newValue,oldValue)
+     })
+  </script>
+</body>
+
+</html>

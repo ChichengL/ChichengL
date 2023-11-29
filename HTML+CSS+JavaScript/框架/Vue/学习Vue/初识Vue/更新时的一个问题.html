@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../JS/vue.js"></script>
+</head>
+<body>
+  <div id="root">
+    <h2>人员列表</h2>
+    <button @click="updateMei()">更新马冬梅的信息</button>
+    <ul>
+      <li v-for="(p,index) of persons" :key="p.id">{{p.name}}--{{p.age}}</li>
+    </ul>
+  </div>
+</body>
+<script>
+  Vue.config.productionTip = false
+  const vm= new Vue({
+    el:'#root',
+    data:{
+      persons:[
+        {id:1,name:'马冬梅',age:30,sex:'female'},
+        {id:2,name:'周冬雨',age:19,sex:'female'},
+        {id:3,name:'周杰伦',age:25,sex:'male'},
+        {id:4,name:'温兆伦',age:22,sex:'male'},
+      ]
+    },
+    methods:{
+      updateMei(){
+        // this.persons[0].name = '罗冬梅'
+        // this.persons[0].age = 18
+        this.persons[0] = {name:'杨冬梅',age:18,sex:'male'} //数据是发生了改变的但是，没有vue没有监测到数据变化
+      }
+    }
+    
+  })
+</script>
+</html>

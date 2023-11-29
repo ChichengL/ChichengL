@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../JS/vue.js"></script>
+</head>
+<body>
+  <div id="root">
+    <h2>当前的n值时{{n}}</h2>
+    <button @click="n++">点击n++</button>
+    <!-- 使用v-show作为条件渲染 ，如果变化频率高，推荐使用v-show，只是展示变化而非结构变化-->
+    <!-- <h2 v-show="false">欢迎来到{{name}}</h2> -->
+    <!-- <h2 v-show="1===1">欢迎来到{{name}}</h2> -->
+
+    <!-- 使用v-if作为条件渲染 ，如果为false结构都不存在-->
+    <!-- <h2 v-if="false">欢迎来到{{name}}</h2> -->
+    <!-- <h2 v-if="1===1">欢迎来到{{name}}</h2> -->
+    <div v-if="n == 1">Angular</div>
+    <div v-else-if="n == 2">React</div>
+    <div v-else-if="n == 3">Vue</div>
+
+  </div>
+  <script>
+    Vue.config.productionTip = false
+    new Vue({
+      el: '#root',
+      data: {
+        name:'aaaa',
+        n:0
+      }
+    })
+  </script>
+</body>
+</html>

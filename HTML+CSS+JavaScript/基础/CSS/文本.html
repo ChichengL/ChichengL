@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .pink{
+      color: pink;
+    }
+    div{
+      text-align: center;
+      /* 文本对齐 center 居中  left左对齐(默认) right右对齐 */
+    }
+    p{
+      text-decoration: line-through;/*underline下划线  overline上划线  line-through删除线 none 默认无线*/
+      text-indent:2em;
+      /* 首行缩进  px是像素大小  em是相对文字大小 */
+      line-height: 40px;
+      /* 行间距  包括上下间距和文字高度 */
+      /* 文字阴影  text-shadow 
+      h-shadow 必需  水平阴影的位置可以为负  v-shadow 必需  垂直阴影的位置  允许负
+      blur 可选  模糊距离  color 可选 阴影的颜色*/
+
+    }
+    
+  </style>
+
+  <!-- 内部样式表   <style></style> 可以放在html的任何地方但一般在头部且  可以控制整个html的属性
+   -->
+
+  <!-- 外部样式表就是单独创建一个css -->
+   <link rel="stylesheet" href="style.css">
+   <!-- 使用的相对路径 -->
+</head>
+<body>
+  <div class="pink">aaaa</div>
+  <div style="color:red;font-size:30px">aaaaaaaaa</div>
+  <!-- 上面是行内样式表控制单行的 -->
+  <p >我是沙贝<br>拷贝</p>
+  <ul>
+    <li>dsadasd</li>
+    <li>dsadadw</li>
+  </ul>
+</body>
+</html>

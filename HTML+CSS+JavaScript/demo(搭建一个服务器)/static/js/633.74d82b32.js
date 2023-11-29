@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkvue_test"]=self["webpackChunkvue_test"]||[]).push([[633],{6633:function(e,t,u){u.r(t),u.d(t,{default:function(){return c}});var l=function(){var e=this,t=e._self._c;return t("ul",[t("li",[e._v("消息编号"+e._s(e.$route.query.id))]),t("li",[e._v("消息标题"+e._s(e.$route.query.title))])])},n=[],s={name:"myDetail",mounted(){console.log(this)}},r=s,i=u(1001),o=(0,i.Z)(r,l,n,!1,null,null,null),c=o.exports}}]);
-//# sourceMappingURL=633.74d82b32.js.map

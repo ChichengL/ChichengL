@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../JS/vue.js"></script>
+</head>
+<body>
+  <div id="root">
+    <h2 :style="{opacity}">欢迎学习Vue</h2>
+    <button @click="stop">点击停止渐变</button>
+  </div>
+</body>
+<script>
+  Vue.config.productionTip = false
+  new Vue({
+    el:'#root',
+    data:{
+      opacity:1,
+      timer:null
+    },
+    methods:{
+      // change(){
+      //   console.log('开启定时器')
+      //   setInterval(()=>{
+      //     this.opacity -=0.01
+      //     if(this.opacity<=0) this.opacity = 1
+      //   },160)
+      // }
+      stop(){
+        // clearInterval(this.timer)
+        // this.opacity = 1
+        this.$destroy()
+      },
+      //关闭定时器
+     
+    },
+    mounted() {
+      console.log('mounted')
+      //开启定时器
+      this.timer = setInterval(()=>{
+        this.opacity -=0.01
+        if(this.opacity<=0) this.opacity = 1
+      },16)
+    },
+    beforeDestroy() {
+      console.log('beforeDestroy')
+      clearInterval(this.timer)
+    },
+  })
+</script>
+</html>

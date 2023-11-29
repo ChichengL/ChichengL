@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>表单域</title>
+</head>
+<body>
+  <!--action是提交对象，method是提交方式，name是指由哪个表单提交的信息-->
+  <form action="demo.php" method="post" name="name1">
+    <!--value是空白选框中的文字--> 
+    <!-- text是文本框默认为20字符 -->
+<!--input用于收集用户信息 <input type="属性值"/>-->
+<!--maxlength用于限制字符最大长度-->
+<!--radio单选按钮 必须选 按钮必须要有同一个name才能单选-->
+<!--单选框和复选框可以设置checked属性，当页面打开时默认勾选上-->
+<!--checkbox复选框可选可不选-->
+<!-- submit定义提交按钮 -->
+<!-- 使用submit后用value可以改变提交框内的文字 -->
+<!-- reset可以重置表单内容还原为默认状态 -->
+<!-- button普通按钮 搭配js使用-->
+<!-- 文件域上传文件使用 -->
+<!-- label标签 for属性与id属性相同-->
+    <label for="text">用户名:</label><input type="text" name="username" value="请输入用户名" maxlength="6" id="text"><br>
+
+    <label for="password">密码</label>&nbsp;&nbsp;&nbsp;:<input type="password" name="password" ><br> 
+
+    性别: <label for="nan">男</label><input type="radio" name="sex" value="请选择性别" id="nan">女<input type="radio" name="sex">未知<input type="radio" name="sex"><br>
+    
+    爱好:电子竞技<input type="checkbox" name="hobby">干饭<input type="checkbox" name="hobby">睡觉<input type="checkbox" name="hobby"><br>
+
+    <input type="submit" value="免费注册"><br>
+    <input type="reset" value="重新填写"><br>
+    <input type="button" value="发送验证码"><br>
+    上传头像：<input type="file"><br>
+    <!-- select下拉表单元素 -->
+<!-- selected可以设定默认选项 -->
+<select>
+  <option selected>请选择</option>
+  <option>四川</option>
+  <option>重庆</option>
+  <option>北京</option>
+  <option>浙江</option>
+  <option>江苏</option>
+  <option>上海</option>
+</select><br>
+<!-- textarea被适用于内容较多的情况,常见留言板 -->
+<!-- cols列数，rows行的数 -->
+<textarea rows="5" cols="30">
+</textarea>
+  </form>
+
+</body>
+</html>

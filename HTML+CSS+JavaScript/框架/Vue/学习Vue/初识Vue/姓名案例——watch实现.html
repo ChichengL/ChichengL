@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>姓名案例_watch实现</title>
+  <script src="../JS/vue.js"></script>
+</head>
+
+<body> 
+  <div id="root">
+    姓：<input type="text" v-model="firstName"><br>
+    名：<input type="text" v-model="lastName"><br>
+    <!-- 姓名：<span>{{firstName.slice(0,3)}}-{{lastName}}</span> -->
+    姓名：<span>{{fullName}}</span>
+    <button @click="toggle">切换天气</button>
+  </div>
+  <script>
+    Vue.config.productionTip = false
+    const vm = new Vue({
+      el: '#root',
+      data: {
+        firstName: '张',
+        lastName: '三',
+        fullName: '张-三'
+      },
+      methods: {
+        toggle () {
+          this.isHot = !this.isHot
+        }
+      },
+      watch: {
+        firstName (newValue) {
+          this.fullName = newValue+'-'+this.lastName
+        },
+        lastName (newValue) {
+          this.fullName = this.firstName +'-'+newValue
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

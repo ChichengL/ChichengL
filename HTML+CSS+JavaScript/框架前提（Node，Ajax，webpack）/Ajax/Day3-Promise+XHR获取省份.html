@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <p class="my-p"></p>
+  <script>
+    const p = new Promise((resolve,reject)=>{
+      //定义xhr对象
+      const xhr = new XMLHttpRequest()
+      xhr.open('GET','http://hmajax.itheima.net/api/province')
+      xhr.addEventListener('loadend',()=>{
+        //利用响应状态码，判断请求是否成功或者失败
+        //2xx开头的都是成功的响应码
+        if(xhr.status>=200 && xhr.status< 300)
+        {
+          resolve(JSON.parse(xhr.response))
+        }else{
+          reject(new Error(xhr.response))
+        }
+      })
+      xhr.send()
+    })
+    p.then(result=>{
+      document.querySelector('.my-p').innerHTML = result.list.join('<br>')
+    }).catch(error=>{
+      document.querySelector('.my-p').innerHTML = error.message
+    })
+  </script>
+</body>
+</html>

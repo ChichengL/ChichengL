@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkvue_test"]=self["webpackChunkvue_test"]||[]).push([[10],{1010:function(e,n,u){u.r(n),u.d(n,{default:function(){return c}});var t=function(){var e=this;e._self._c;return e._m(0)},s=[function(){var e=this,n=e._self._c;return n("ul",[n("li",[e._v("news001")]),n("li",[e._v("news002")]),n("li",[e._v("news003")])])}],l={name:"myNews"},r=l,i=u(1001),_=(0,i.Z)(r,t,s,!1,null,null,null),c=_.exports}}]);
-//# sourceMappingURL=10.b09342d3.js.map
