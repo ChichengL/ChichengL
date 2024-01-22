@@ -1,6 +1,6 @@
 # Vue3源码学习
 
-整体流程
+<span id="ProcessInit">整体流程</span>如下，返回[阅读](#ProcessInitGoBack)
 
 ![整体流程](Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.assets/138114565-3e0eecbb-7fd0-4203-bf36-5e5fd8003ce0.png)
 
@@ -20,20 +20,25 @@
 
 建议的阅读顺序
 
-1. **响应式系统**：
-    - 从 `@vue/reactivity` 模块开始，这是Vue3响应式设计的核心部分。理解如何使用ES6的Proxy实现数据劫持，以及如何通过`ref`、`reactive`、`readonly`等函数创建响应式对象。探究`effect`、`track`、`trigger`等函数如何收集和触发依赖。
-2. **组件基础**：
-    - 进一步阅读 `@vue/runtime-core` 模块，理解Vue组件的基本结构和生命周期。重点关注`Component`、`VNode`、`PublicInstance`等概念，以及`setup`、`render`、`props`、`emits`等组件属性的处理逻辑。
-3. **渲染器适配**：
-    - 然后阅读 `@vue/runtime-dom` 或 `@vue/server-renderer`，这取决于你关注客户端渲染还是服务器端渲染。了解Vue如何与DOM进行交互，包括如何创建和更新DOM节点，以及如何处理事件、插槽等。
-4. **高级特性**：
-    - 深入研究Vue3提供的高级API实现，如`@vue/runtime-core`中的`watch`、`watchEffect`、`computed`、`provide`、`inject`等函数的实现逻辑。
-5. **模板编译**（可选）：
-    - 如果对Vue的模板编译过程感兴趣，可以阅读 `@vue/compiler-dom` 和 `@vue/compiler-sfc` 模块，了解Vue单文件组件（SFC）的模板是如何被编译成渲染函数的。
-6. **周边生态**（可选）：
-    - Vue Router、Vuex等官方库的源码也是很好的学习材料，它们展示了如何将响应式系统与其他功能模块相结合，实现更复杂的业务逻辑。
-7. **项目启动与构建**（可选）：
-    - 最后，可以看看Vue CLI或Vite等项目脚手架的源码，了解项目初始化、构建、热更新等工程化方面的实现。
+1. **基础概念理解**：
+    - 首先，熟悉 TypeScript 语言，了解其接口、泛型、装饰器等特性。
+    - 学习 ES6 的 Proxy 和 Reflect API，因为 Vue3 响应式系统基于这些特性构建。
+2. **响应式系统**：
+    - 从 `@vue/reactivity` 模块开始，阅读 `ref`、`reactive`、`readonly`、`shallowRef`、`shallowReactive`、`toRefs` 等核心 API 的实现，理解如何创建和跟踪响应式对象。
+    - 探究 `effect`、`track`、`trigger`、`ComputedRefImpl` 等响应式依赖收集与更新的实现细节。
+3. **组件生命周期与渲染**：
+    - 阅读 `@vue/runtime-core` 模块，理解 Vue 组件的基础结构，如 `Component`、`VNode`、`Renderer` 等概念。
+    - 分析组件的生命周期钩子函数如何运作，重点关注 `setup` 函数、`h`（hyperscript）函数等。
+    - 研究虚拟 DOM 的创建、Diff 算法、DOM 更新等相关逻辑。
+4. **渲染器适配**：
+    - 阅读 `@vue/runtime-dom` 或 `@vue/runtime-sfc` 模块，了解 Vue 如何与 DOM 进行交互，包括如何挂载组件、更新 DOM、处理事件、插槽等内容。
+    - 对比不同平台（如 web、weex、native）的渲染器实现差异，理解 Vue 的跨平台渲染机制。
+5. **高级特性**：
+    - 阅读 `@vue/shared` 模块，理解 Vue 提供的一些工具函数和通用逻辑。
+    - 分析 `@vue/composition-api` 或 `@vue/runtime-dom` 中的 `provide`、`inject`、`watch`、`watchEffect`、`nextTick`、`ref` 等高级 API 的实现。
+    - 深入研究 Vue Router、Vuex 等官方库与 Vue3 框架集成的实现细节。
+6. **编译器相关**：
+    - 如果感兴趣，可以进一步探索 Vue 单文件组件（SFC）的编译过程，阅读 `@vue/compiler-core`、`@vue/compiler-dom`、`@vue/compiler-sfc` 等模块，了解模板编译成渲染函数的逻辑。
 
 
 
@@ -474,27 +479,57 @@ export function triggerEffects(
 }
 ```
 
-
+vue2是通过dep和watcher实现收集和派发的
 
 这里，没有读过vue2源码的可能有点懵不知道依赖是如何收集的。主要是靠trackEffect和triggerEffects进行收集
 
 `trackEffect` 主要负责收集依赖。当一个副作用函数（如组件的渲染函数或计算属性的getter）访问响应式对象的属性时，Vue3会通过`track`函数跟踪这个访问，`trackEffect`就是在这个过程中被调用的。
 
-具体工作原理：
+`track`具体工作原理：
 
 1. 当访问响应式对象属性时，Vue3通过`Reflect.get`等操作触发`track`函数。
 2. `track`函数会调用`trackEffect`，将当前激活的副作用函数（保存在全局变量`activeEffect`中）与当前访问的属性关联起来。这个关联存储在响应式对象的依赖映射表（如`targetMap`）中，建立起“副作用函数 - 数据依赖”的映射关系。
 3. 这样，当属性值发生变化时，Vue3就能知道哪些副作用函数需要重新执行。
 
+`trackEffect`负责建立并维护一个副作用函数(`effect`)与依赖收集器(`Dep`)之间的关联。
 
+- 检查 `effect` 是否已经关联到了 `dep`，若未关联或关联信息不一致，则将其关联起来，并更新 `dep` 中的记录。
+- 若 `effect` 已经有其他依赖项，则先清理与旧依赖的关系，然后将新 `dep` 添加至 `effect.deps` 数组。
+- 在开发环境下，如果 `effect` 定义了 `onTrack` 回调函数，则调用此回调，以便在开发者工具中显示依赖追踪信息。
 
 `triggerEffects` 主要负责触发依赖的更新。当响应式对象的属性值发生变化时，Vue3会通过`trigger`函数触发依赖的更新。
 
-具体工作原理：
+`trigger`具体工作原理：
 
 1. 当响应式对象属性发生变化时，Vue3通过`Reflect.set`等操作触发`trigger`函数。
 2. `trigger`函数会遍历与该属性关联的所有副作用函数（通过依赖映射表获取），并将它们收集到一个数组中。
 3. 调用`triggerEffects`函数，遍历这些收集到的副作用函数，逐一触发它们的执行，从而引发视图或其他相关状态的更新。
+
+
+
+`triggerEffect`用于触发那些依赖于特定响应式数据集合（由 `dep` 表示）的副作用函数。
+
+- 遍历与 `dep` 相关联的所有 `effect`，判断其"脏"级别（`dirtyLevel`）是否低于当前要求的级别。
+- 如果满足条件，则更新 `effect` 的“脏”级别，并决定是否需要安排其执行。
+- 当 `effect` 第一次变得“脏”时，会标记其为待调度，并可能调用其 `onTrigger` 钩子函数来提供调试信息。
+- 最终调用 `effect.trigger()` 来实际执行副作用函数，即完成视图更新或者其他相关的状态变更操作。
+- 调用 `scheduleEffects(dep)` 对所有需要调度的副作用函数进行合理的异步调度处理。
+- 调用 `resetScheduling()` 可能是为了重置调度器的状态。
+
+
+
+
+
+ReactiveEffect对象在，computed，watch，组件渲染（会生成一个ReactiveEffect对象）
+
+- ![image-20240122213028202](Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.assets/image-20240122213028202.png)这是ReactiveEffect
+- <img src="Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.assets/image-20240122213011520.png" alt="image-20240122213011520" style="zoom:80%;" />第二个传入的就是trigger函数（computed）
+- ![image-20240122213606841](Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.assets/image-20240122213606841.png)trigger是noop（watch）
+- ![image-20240122213650545](Vue3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.assets/image-20240122213650545.png)trigger是noop（render）
+
+
+
+
 
 
 
@@ -650,6 +685,63 @@ reactive的set拦截在`baseHanlder`中的MutableReactiveHandler，里面进行�
 也就是调用了computed这个函数
 
 ```ts
+export class ComputedRefImpl<T> {
+  public dep?: Dep = undefined
+
+  private _value!: T
+  public readonly effect: ReactiveEffect<T>
+
+  public readonly __v_isRef = true
+  public readonly [ReactiveFlags.IS_READONLY]: boolean = false
+
+  public _cacheable: boolean
+
+  constructor(
+    getter: ComputedGetter<T>,
+    private readonly _setter: ComputedSetter<T>,
+    isReadonly: boolean,
+    isSSR: boolean,
+  ) {
+    this.effect = new ReactiveEffect(
+      () => getter(this._value),
+      () => triggerRefValue(this, DirtyLevels.MaybeDirty),
+      () => this.dep && scheduleEffects(this.dep),
+    )
+    this.effect.computed = this
+    this.effect.active = this._cacheable = !isSSR
+    this[ReactiveFlags.IS_READONLY] = isReadonly
+  }
+
+  get value() {
+    // the computed ref may get wrapped by other proxies e.g. readonly() #3376
+    const self = toRaw(this)
+    if (!self._cacheable || self.effect.dirty) {
+      if (hasChanged(self._value, (self._value = self.effect.run()!))) {
+        triggerRefValue(self, DirtyLevels.Dirty)
+      }
+    }
+    trackRefValue(self)
+    if (self.effect._dirtyLevel >= DirtyLevels.MaybeDirty) {
+      triggerRefValue(self, DirtyLevels.MaybeDirty)
+    }
+    return self._value
+  }
+
+  set value(newValue: T) {
+    this._setter(newValue)
+  }
+
+  // #region polyfill _dirty for backward compatibility third party code for Vue <= 3.3.x
+  get _dirty() {
+    return this.effect.dirty
+  }
+
+  set _dirty(v) {
+    this.effect.dirty = v
+  }
+  // #endregion
+}
+
 export function computed<T>(
   getter: ComputedGetter<T>,
   debugOptions?: DebuggerOptions,
@@ -936,7 +1028,7 @@ Tips：这里涉及到依赖收集
 
 
 
-## runtime-core
+## runtime-core——组件生命周期与渲染
 
 这章不仅涉及到组件的基础和生命周期，此外还涉及到一些高级api的实现
 
@@ -2546,5 +2638,2164 @@ export function flushPostFlushCbs(seen?: CountMap) {
 
 `queueJob`和`queuePostFlushCb`负责将任务添加到相应队列，`queueFlush`负责触发任务的执行，而`flushJobs`和`flushPostFlushCbs`则分别处理常规的异步任务队列和post-flush回调队列。（比如DOM更新）
 
-渲染有关
 
+
+
+
+#### LifeStyle
+
+```ts
+export const onMounted = createHook(LifecycleHooks.MOUNTED)
+export const createHook =
+  <T extends Function = () => any>(lifecycle: LifecycleHooks) =>
+  (hook: T, target: ComponentInternalInstance | null = currentInstance) =>
+    // post-create lifecycle registrations are noops during SSR (except for serverPrefetch)
+    (!isInSSRComponentSetup || lifecycle === LifecycleHooks.SERVER_PREFETCH) &&
+    injectHook(lifecycle, (...args: unknown[]) => hook(...args), target)
+export function injectHook(
+  type: LifecycleHooks,
+  hook: Function & { __weh?: Function },
+  target: ComponentInternalInstance | null = currentInstance,
+  prepend: boolean = false,
+): Function | undefined {
+  if (target) {
+    const hooks = target[type] || (target[type] = [])
+    // cache the error handling wrapper for injected hooks so the same hook
+    // can be properly deduped by the scheduler. "__weh" stands for "with error
+    // handling".
+    const wrappedHook =
+      hook.__weh ||
+      (hook.__weh = (...args: unknown[]) => {
+        if (target.isUnmounted) {
+          return
+        }
+        // disable tracking inside all lifecycle hooks
+        // since they can potentially be called inside effects.
+        pauseTracking()
+        // Set currentInstance during hook invocation.
+        // This assumes the hook does not synchronously trigger other hooks, which
+        // can only be false when the user does something really funky.
+        const reset = setCurrentInstance(target)
+        const res = callWithAsyncErrorHandling(hook, target, type, args)
+        reset()
+        resetTracking()
+        return res
+      })
+    if (prepend) {
+      hooks.unshift(wrappedHook)
+    } else {
+      hooks.push(wrappedHook)
+    }
+    return wrappedHook
+  } else if (__DEV__) {
+    const apiName = toHandlerKey(ErrorTypeStrings[type].replace(/ hook$/, ''))
+    warn(
+      `${apiName} is called when there is no active component instance to be ` +
+        `associated with. ` +
+        `Lifecycle injection APIs can only be used during execution of setup().` +
+        (__FEATURE_SUSPENSE__
+          ? ` If you are using async setup(), make sure to register lifecycle ` +
+            `hooks before the first await statement.`
+          : ``),
+    )
+  }
+}
+```
+
+
+
+### 渲染有关
+
+#### render.ts
+
+```ts
+export function createRenderer<
+  HostNode = RendererNode,
+  HostElement = RendererElement,
+>(options: RendererOptions<HostNode, HostElement>) {
+  return baseCreateRenderer<HostNode, HostElement>(options)
+}
+```
+
+先调用createRenderer函数
+
+1. **初始化渲染器功能**：
+    - `createRenderer` 函数接收一个包含一系列渲染器所需基本操作的对象作为参数，如创建元素、设置元素文本、更新属性等。
+    - 根据提供的平台相关API，Vue将创建一个渲染器实例，该实例具有处理虚拟DOM（VNode）和真实DOM之间转换的能力。
+2. **处理组件渲染**：
+    - 渲染器中的核心方法如 `render` 和 `patch` 负责解析和更新组件的VNode树，将组件和元素的VNode转换为真实的DOM结构。
+    - `patch` 方法比较新旧VNode树的不同，最小化DOM操作（如diff算法），只对发生改变的部分进行更新，以提高性能。
+3. **组件生命周期钩子的调用**：
+    - 在创建和更新DOM的过程中，渲染器会适时地调用组件的生命周期钩子函数，如 `onBeforeMount`、`onMounted`、`onBeforeUpdate`、`onUpdated`、`onBeforeUnmount`、`onUnmounted` 等。
+
+createRenderer（简易版）在runtime-dom中调用
+
+```ts
+export function createRenderer(options) {
+  const {
+    createElement: hostCreateElement,
+    setElementText: hostSetElementText,
+    patchProp: hostPatchProp,
+    insert: hostInsert,
+    remove: hostRemove,
+    setText: hostSetText,
+    createText: hostCreateText,
+  } = options;
+
+  const render = (vnode, container) => {
+    console.log("调用 patch")
+    patch(null, vnode, container);
+  };
+
+  function patch(
+    n1,
+    n2,
+    container = null,
+    anchor = null,
+    parentComponent = null
+  ) {
+    // 基于 n2 的类型来判断
+    // 因为 n2 是新的 vnode
+    const { type, shapeFlag } = n2;
+    switch (type) {
+      case Text:
+        processText(n1, n2, container);
+        break;
+      // 其中还有几个类型比如： static fragment comment
+      case Fragment:
+        processFragment(n1, n2, container);
+        break;
+      default:
+        // 这里就基于 shapeFlag 来处理
+        if (shapeFlag & ShapeFlags.ELEMENT) {
+          console.log("处理 element");
+          processElement(n1, n2, container, anchor, parentComponent);
+        } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+          console.log("处理 component");
+          processComponent(n1, n2, container, parentComponent);
+        }
+    }
+  }
+
+  function processFragment(n1: any, n2: any, container: any) {
+    // 只需要渲染 children ，然后给添加到 container 内
+    if (!n1) {
+      // 初始化 Fragment 逻辑点
+      console.log("初始化 Fragment 类型的节点");
+      mountChildren(n2.children, container);
+    }
+  }
+
+  function processText(n1, n2, container) {
+    console.log("处理 Text 节点");
+    if (n1 === null) {
+      // n1 是 null 说明是 init 的阶段
+      // 基于 createText 创建出 text 节点，然后使用 insert 添加到 el 内
+      console.log("初始化 Text 类型的节点");
+      hostInsert((n2.el = hostCreateText(n2.children as string)), container);
+    } else {
+      // update
+      // 先对比一下 updated 之后的内容是否和之前的不一样
+      // 在不一样的时候才需要 update text
+      // 这里抽离出来的接口是 setText
+      // 注意，这里一定要记得把 n1.el 赋值给 n2.el, 不然后续是找不到值的
+      const el = (n2.el = n1.el!);
+      if (n2.children !== n1.children) {
+        console.log("更新 Text 类型的节点");
+        hostSetText(el, n2.children as string);
+      }
+    }
+  }
+
+  function processElement(n1, n2, container, anchor, parentComponent) {
+    if (!n1) {
+      mountElement(n2, container, anchor);
+    } else {
+      // todo
+      updateElement(n1, n2, container, anchor, parentComponent);
+    }
+  }
+
+  function updateElement(n1, n2, container, anchor, parentComponent) {
+    const oldProps = (n1 && n1.props) || {};
+    const newProps = n2.props || {};
+    // 应该更新 element
+    console.log("应该更新 element");
+    console.log("旧的 vnode", n1);
+    console.log("新的 vnode", n2);
+
+    // 需要把 el 挂载到新的 vnode
+    const el = (n2.el = n1.el);
+
+    // 对比 props
+    patchProps(el, oldProps, newProps);
+
+    // 对比 children
+    patchChildren(n1, n2, el, anchor, parentComponent);
+  }
+
+  function patchProps(el, oldProps, newProps) {
+    // 对比 props 有以下几种情况
+    // 1. oldProps 有，newProps 也有，但是 val 值变更了
+    // 举个栗子
+    // 之前: oldProps.id = 1 ，更新后：newProps.id = 2
+
+    // key 存在 oldProps 里 也存在 newProps 内
+    // 以 newProps 作为基准
+    for (const key in newProps) {
+      const prevProp = oldProps[key];
+      const nextProp = newProps[key];
+      if (prevProp !== nextProp) {
+        // 对比属性
+        // 需要交给 host 来更新 key
+        hostPatchProp(el, key, prevProp, nextProp);
+      }
+    }
+
+    // 2. oldProps 有，而 newProps 没有了
+    // 之前： {id:1,tId:2}  更新后： {id:1}
+    // 这种情况下我们就应该以 oldProps 作为基准，因为在 newProps 里面是没有的 tId 的
+    // 还需要注意一点，如果这个 key 在 newProps 里面已经存在了，说明已经处理过了，就不要在处理了
+    for (const key in oldProps) {
+      const prevProp = oldProps[key];
+      const nextProp = null;
+      if (!(key in newProps)) {
+        // 这里是以 oldProps 为基准来遍历，
+        // 而且得到的值是 newProps 内没有的
+        // 所以交给 host 更新的时候，把新的值设置为 null
+        hostPatchProp(el, key, prevProp, nextProp);
+      }
+    }
+  }
+
+  function patchChildren(n1, n2, container, anchor, parentComponent) {
+    const { shapeFlag: prevShapeFlag, children: c1 } = n1;
+    const { shapeFlag, children: c2 } = n2;
+
+    // 如果 n2 的 children 是 text 类型的话
+    // 就看看和之前的 n1 的 children 是不是一样的
+    // 如果不一样的话直接重新设置一下 text 即可
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (c2 !== c1) {
+        console.log("类型为 text_children, 当前需要更新");
+        hostSetElementText(container, c2 as string);
+      }
+    } else {
+      // 看看之前的是不是 text
+      if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+        // 先清空
+        // 然后在把新的 children 给 mount 生成 element
+        hostSetElementText(container, "");
+        mountChildren(c2, container);
+      } else {
+        // array diff array
+      // 如果之前是 array_children
+      // 现在还是 array_children 的话
+      // 那么我们就需要对比两个 children 啦
+        patchKeyedChildren(c1, c2, container, parentComponent, anchor);
+      }
+
+    }
+  }
+
+  function patchKeyedChildren(
+    c1: any[],
+    c2: any[],
+    container,
+    parentAnchor,
+    parentComponent
+  ) {
+    let i = 0;
+    const l2 = c2.length;
+    let e1 = c1.length - 1;
+    let e2 = l2 - 1;
+
+    const isSameVNodeType = (n1, n2) => {
+      return n1.type === n2.type && n1.key === n2.key;
+    };
+
+    while (i <= e1 && i <= e2) {
+      const prevChild = c1[i];
+      const nextChild = c2[i];
+
+      if (!isSameVNodeType(prevChild, nextChild)) {
+        console.log("两个 child 不相等(从左往右比对)");
+        console.log(`prevChild:${prevChild}`);
+        console.log(`nextChild:${nextChild}`);
+        break;
+      }
+
+      console.log("两个 child 相等，接下来对比这两个 child 节点(从左往右比对)");
+      patch(prevChild, nextChild, container, parentAnchor, parentComponent);
+      i++;
+    }
+
+    while (i <= e1 && i <= e2) {
+      // 从右向左取值
+      const prevChild = c1[e1];
+      const nextChild = c2[e2];
+
+      if (!isSameVNodeType(prevChild, nextChild)) {
+        console.log("两个 child 不相等(从右往左比对)");
+        console.log(`prevChild:${prevChild}`);
+        console.log(`nextChild:${nextChild}`);
+        break;
+      }
+      console.log("两个 child 相等，接下来对比这两个 child 节点(从右往左比对)");
+      patch(prevChild, nextChild, container, parentAnchor, parentComponent);
+      e1--;
+      e2--;
+    }
+
+    if (i > e1 && i <= e2) {
+      // 如果是这种情况的话就说明 e2 也就是新节点的数量大于旧节点的数量
+      // 也就是说新增了 vnode
+      // 应该循环 c2
+      // 锚点的计算：新的节点有可能需要添加到尾部，也可能添加到头部，所以需要指定添加的问题
+      // 要添加的位置是当前的位置(e2 开始)+1
+      // 因为对于往左侧添加的话，应该获取到 c2 的第一个元素
+      // 所以我们需要从 e2 + 1 取到锚点的位置
+      const nextPos = e2 + 1;
+      const anchor = nextPos < l2 ? c2[nextPos].el : parentAnchor;
+      while (i <= e2) {
+        console.log(`需要新创建一个 vnode: ${c2[i].key}`);
+        patch(null, c2[i], container, anchor, parentComponent);
+        i++;
+      }
+    } else if (i > e2 && i <= e1) {
+      // 这种情况的话说明新节点的数量是小于旧节点的数量的
+      // 那么我们就需要把多余的
+      while (i <= e1) {
+        console.log(`需要删除当前的 vnode: ${c1[i].key}`);
+        hostRemove(c1[i].el);
+        i++;
+      }
+    } else {
+      // 左右两边都比对完了，然后剩下的就是中间部位顺序变动的
+      // 例如下面的情况
+      // a,b,[c,d,e],f,g
+      // a,b,[e,c,d],f,g
+
+      let s1 = i;
+      let s2 = i;
+      const keyToNewIndexMap = new Map();
+      let moved = false;
+      let maxNewIndexSoFar = 0;
+      // 先把 key 和 newIndex 绑定好，方便后续基于 key 找到 newIndex
+      // 时间复杂度是 O(1)
+      for (let i = s2; i <= e2; i++) {
+        const nextChild = c2[i];
+        keyToNewIndexMap.set(nextChild.key, i);
+      }
+
+      // 需要处理新节点的数量
+      const toBePatched = e2 - s2 + 1;
+      let patched = 0;
+      // 初始化 从新的index映射为老的index
+      // 创建数组的时候给定数组的长度，这个是性能最快的写法
+      const newIndexToOldIndexMap = new Array(toBePatched);
+      // 初始化为 0 , 后面处理的时候 如果发现是 0 的话，那么就说明新值在老的里面不存在
+      for (let i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0;
+
+      // 遍历老节点
+      // 1. 需要找出老节点有，而新节点没有的 -> 需要把这个节点删除掉
+      // 2. 新老节点都有的，—> 需要 patch
+      for (i = s1; i <= e1; i++) {
+        const prevChild = c1[i];
+
+        // 优化点
+        // 如果老的节点大于新节点的数量的话，那么这里在处理老节点的时候就直接删除即可
+        if (patched >= toBePatched) {
+          hostRemove(prevChild.el);
+          continue;
+        }
+
+        let newIndex;
+        if (prevChild.key != null) {
+          // 这里就可以通过key快速的查找了， 看看在新的里面这个节点存在不存在
+          // 时间复杂度O(1)
+          newIndex = keyToNewIndexMap.get(prevChild.key);
+        } else {
+          // 如果没key 的话，那么只能是遍历所有的新节点来确定当前节点存在不存在了
+          // 时间复杂度O(n)
+          for (let j = s2; j <= e2; j++) {
+            if (isSameVNodeType(prevChild, c2[j])) {
+              newIndex = j;
+              break;
+            }
+          }
+        }
+
+        // 因为有可能 nextIndex 的值为0（0也是正常值）
+        // 所以需要通过值是不是 undefined 或者 null 来判断
+        if (newIndex === undefined) {
+          // 当前节点的key 不存在于 newChildren 中，需要把当前节点给删除掉
+          hostRemove(prevChild.el);
+        } else {
+          // 新老节点都存在
+          console.log("新老节点都存在");
+          // 把新节点的索引和老的节点的索引建立映射关系
+          // i + 1 是因为 i 有可能是0 (0 的话会被认为新节点在老的节点中不存在)
+          newIndexToOldIndexMap[newIndex - s2] = i + 1;
+          // 来确定中间的节点是不是需要移动
+          // 新的 newIndex 如果一直是升序的话，那么就说明没有移动
+          // 所以我们可以记录最后一个节点在新的里面的索引，然后看看是不是升序
+          // 不是升序的话，我们就可以确定节点移动过了
+          if (newIndex >= maxNewIndexSoFar) {
+            maxNewIndexSoFar = newIndex;
+          } else {
+            moved = true;
+          }
+
+          patch(prevChild, c2[newIndex], container, null, parentComponent);
+          patched++;
+        }
+      }
+
+      // 利用最长递增子序列来优化移动逻辑
+      // 因为元素是升序的话，那么这些元素就是不需要移动的
+      // 而我们就可以通过最长递增子序列来获取到升序的列表
+      // 在移动的时候我们去对比这个列表，如果对比上的话，就说明当前元素不需要移动
+      // 通过 moved 来进行优化，如果没有移动过的话 那么就不需要执行算法
+      // getSequence 返回的是 newIndexToOldIndexMap 的索引值
+      // 所以后面我们可以直接遍历索引值来处理，也就是直接使用 toBePatched 即可
+      const increasingNewIndexSequence = moved
+        ? getSequence(newIndexToOldIndexMap)
+        : [];
+      let j = increasingNewIndexSequence.length - 1;
+
+      // 遍历新节点
+      // 1. 需要找出老节点没有，而新节点有的 -> 需要把这个节点创建
+      // 2. 最后需要移动一下位置，比如 [c,d,e] -> [e,c,d]
+
+      // 这里倒循环是因为在 insert 的时候，需要保证锚点是处理完的节点（也就是已经确定位置了）
+      // 因为 insert 逻辑是使用的 insertBefore()
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        // 确定当前要处理的节点索引
+        const nextIndex = s2 + i;
+        const nextChild = c2[nextIndex];
+        // 锚点等于当前节点索引+1
+        // 也就是当前节点的后面一个节点(又因为是倒遍历，所以锚点是位置确定的节点)
+        const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : parentAnchor;
+
+        if (newIndexToOldIndexMap[i] === 0) {
+          // 说明新节点在老的里面不存在
+          // 需要创建
+          patch(null, nextChild, container, anchor, parentComponent);
+        } else if (moved) {
+          // 需要移动
+          // 1. j 已经没有了 说明剩下的都需要移动了
+          // 2. 最长子序列里面的值和当前的值匹配不上， 说明当前元素需要移动
+          if (j < 0 || increasingNewIndexSequence[j] !== i) {
+            // 移动的话使用 insert 即可
+            hostInsert(nextChild.el, container, anchor);
+          } else {
+            // 这里就是命中了  index 和 最长递增子序列的值
+            // 所以可以移动指针了
+            j--;
+          }
+        }
+      }
+    }
+  }
+
+  function mountElement(vnode, container, anchor) {
+    const { shapeFlag, props } = vnode;
+    // 1. 先创建 element
+    // 基于可扩展的渲染 api
+    const el = (vnode.el = hostCreateElement(vnode.type));
+
+    // 支持单子组件和多子组件的创建
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      // 举个栗子
+      // render(){
+      //     return h("div",{},"test")
+      // }
+      // 这里 children 就是 test ，只需要渲染一下就完事了
+      console.log(`处理文本:${vnode.children}`);
+      hostSetElementText(el, vnode.children);
+    } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+      // 举个栗子
+      // render(){
+      // Hello 是个 component
+      //     return h("div",{},[h("p"),h(Hello)])
+      // }
+      // 这里 children 就是个数组了，就需要依次调用 patch 递归来处理
+      mountChildren(vnode.children, el);
+    }
+
+    // 处理 props
+    if (props) {
+      for (const key in props) {
+        // todo
+        // 需要过滤掉vue自身用的key
+        // 比如生命周期相关的 key: beforeMount、mounted
+        const nextVal = props[key];
+        hostPatchProp(el, key, null, nextVal);
+      }
+    }
+
+    // todo
+    // 触发 beforeMount() 钩子
+    console.log("vnodeHook  -> onVnodeBeforeMount");
+    console.log("DirectiveHook  -> beforeMount");
+    console.log("transition  -> beforeEnter");
+
+    // 插入
+    hostInsert(el, container, anchor);
+
+    // todo
+    // 触发 mounted() 钩子
+    console.log("vnodeHook  -> onVnodeMounted");
+    console.log("DirectiveHook  -> mounted");
+    console.log("transition  -> enter");
+  }
+
+  function mountChildren(children, container) {
+    children.forEach((VNodeChild) => {
+      // todo
+      // 这里应该需要处理一下 vnodeChild
+      // 因为有可能不是 vnode 类型
+      console.log("mountChildren:", VNodeChild);
+      patch(null, VNodeChild, container);
+    });
+  }
+
+  function processComponent(n1, n2, container, parentComponent) {
+    // 如果 n1 没有值的话，那么就是 mount
+    if (!n1) {
+      // 初始化 component
+      mountComponent(n2, container, parentComponent);
+    } else {
+      updateComponent(n1, n2, container);
+    }
+  }
+
+  // 组件的更新
+  function updateComponent(n1, n2, container) {
+    console.log("更新组件", n1, n2);
+    // 更新组件实例引用
+    const instance = (n2.component = n1.component);
+    // 先看看这个组件是否应该更新
+    if (shouldUpdateComponent(n1, n2)) {
+      console.log(`组件需要更新: ${instance}`);
+      // 那么 next 就是新的 vnode 了（也就是 n2）
+      instance.next = n2;
+      // 这里的 update 是在 setupRenderEffect 里面初始化的，update 函数除了当内部的响应式对象发生改变的时候会调用
+      // 还可以直接主动的调用(这是属于 effect 的特性)
+      // 调用 update 再次更新调用 patch 逻辑
+      // 在update 中调用的 next 就变成了 n2了
+      // ps：可以详细的看看 update 中 next 的应用
+      // TODO 需要在 update 中处理支持 next 的逻辑
+      instance.update();
+    } else {
+      console.log(`组件不需要更新: ${instance}`);
+      // 不需要更新的话，那么只需要覆盖下面的属性即可
+      n2.component = n1.component;
+      n2.el = n1.el;
+      instance.vnode = n2;
+    }
+  }
+
+  function mountComponent(initialVNode, container, parentComponent) {
+    // 1. 先创建一个 component instance
+    const instance = (initialVNode.component = createComponentInstance(
+      initialVNode,
+      parentComponent
+    ));
+    console.log(`创建组件实例:${instance.type.name}`);
+    // 2. 给 instance 加工加工
+    setupComponent(instance);
+
+    setupRenderEffect(instance, initialVNode, container);
+  }
+
+  function setupRenderEffect(instance, initialVNode, container) {
+    // 调用 render
+    // 应该传入 ctx 也就是 proxy
+    // ctx 可以选择暴露给用户的 api
+    // 源代码里面是调用的 renderComponentRoot 函数
+    // 这里为了简化直接调用 render
+
+    // obj.name  = "111"
+    // obj.name = "2222"
+    // 从哪里做一些事
+    // 收集数据改变之后要做的事 (函数)
+    // 依赖收集   effect 函数
+    // 触发依赖
+    function componentUpdateFn() {
+      if (!instance.isMounted) {
+        // 组件初始化的时候会执行这里
+        // 为什么要在这里调用 render 函数呢
+        // 是因为在 effect 内调用 render 才能触发依赖收集
+        // 等到后面响应式的值变更后会再次触发这个函数
+        console.log(`${instance.type.name}:调用 render,获取 subTree`);
+        const proxyToUse = instance.proxy;
+        // 可在 render 函数中通过 this 来使用 proxy
+        const subTree = (instance.subTree = normalizeVNode(
+          instance.render.call(proxyToUse, proxyToUse)
+        ));
+        console.log("subTree", subTree);
+
+        // todo
+        console.log(`${instance.type.name}:触发 beforeMount hook`);
+        console.log(`${instance.type.name}:触发 onVnodeBeforeMount hook`);
+
+        // 这里基于 subTree 再次调用 patch
+        // 基于 render 返回的 vnode ，再次进行渲染
+        // 这里我把这个行为隐喻成开箱
+        // 一个组件就是一个箱子
+        // 里面有可能是 element （也就是可以直接渲染的）
+        // 也有可能还是 component
+        // 这里就是递归的开箱
+        // 而 subTree 就是当前的这个箱子（组件）装的东西
+        // 箱子（组件）只是个概念，它实际是不需要渲染的
+        // 要渲染的是箱子里面的 subTree
+        patch(null, subTree, container, null, instance);
+        // 把 root element 赋值给 组件的vnode.el ，为后续调用 $el 的时候获取值
+        initialVNode.el = subTree.el;
+
+        console.log(`${instance.type.name}:触发 mounted hook`);
+        instance.isMounted = true;
+      } else {
+        // 响应式的值变更后会从这里执行逻辑
+        // 主要就是拿到新的 vnode ，然后和之前的 vnode 进行对比
+        console.log(`${instance.type.name}:调用更新逻辑`);
+        // 拿到最新的 subTree
+        const { next, vnode } = instance;
+
+        // 如果有 next 的话， 说明需要更新组件的数据（props，slots 等）
+        // 先更新组件的数据，然后更新完成后，在继续对比当前组件的子元素
+        if (next) {
+          // 问题是 next 和 vnode 的区别是什么
+          next.el = vnode.el;
+          updateComponentPreRender(instance, next);
+        }
+
+        const proxyToUse = instance.proxy;
+        const nextTree = normalizeVNode(
+          instance.render.call(proxyToUse, proxyToUse)
+        );
+        // 替换之前的 subTree
+        const prevTree = instance.subTree;
+        instance.subTree = nextTree;
+
+        // 触发 beforeUpdated hook
+        console.log(`${instance.type.name}:触发 beforeUpdated hook`);
+        console.log(`${instance.type.name}:触发 onVnodeBeforeUpdate hook`);
+
+        // 用旧的 vnode 和新的 vnode 交给 patch 来处理
+        patch(prevTree, nextTree, prevTree.el, null, instance);
+
+        // 触发 updated hook
+        console.log(`${instance.type.name}:触发 updated hook`);
+        console.log(`${instance.type.name}:触发 onVnodeUpdated hook`);
+      }
+    }
+
+    // 在 vue3.2 版本里面是使用的 new ReactiveEffect
+    // 至于为什么不直接用 effect ，是因为需要一个 scope  参数来收集所有的 effect
+    // 而 effect 这个函数是对外的 api ，是不可以轻易改变参数的，所以会使用  new ReactiveEffect
+    // 因为 ReactiveEffect 是内部对象，加一个参数是无所谓的
+    // 后面如果要实现 scope 的逻辑的时候 需要改过来
+    // 现在就先算了
+    instance.update = effect(componentUpdateFn, {
+      scheduler: () => {
+        // 把 effect 推到微任务的时候在执行
+        // queueJob(effect);
+        queueJob(instance.update);
+      },
+    });
+  }
+
+  function updateComponentPreRender(instance, nextVNode) {
+    // 更新 nextVNode 的组件实例
+    // 现在 instance.vnode 是组件实例更新前的
+    // 所以之前的 props 就是基于 instance.vnode.props 来获取
+    // 接着需要更新 vnode ，方便下一次更新的时候获取到正确的值
+    nextVNode.component = instance;
+    // TODO 后面更新 props 的时候需要对比
+    // const prevProps = instance.vnode.props;
+    instance.vnode = nextVNode;
+    instance.next = null;
+
+    const { props } = nextVNode;
+    console.log("更新组件的 props", props);
+    instance.props = props;
+    console.log("更新组件的 slots");
+    // TODO 更新组件的 slots
+    // 需要重置 vnode
+  }
+
+  return {
+    render,
+    createApp: createAppAPI(render),
+  };
+}
+```
+
+
+
+baseCreateRenderer做了
+
+1. 创建真实 DOM 元素：根据传入的 VNode 创建或复用真实的 DOM 节点。
+2. 更新 DOM：对比新旧 VNode，执行必要的 DOM 更新操作，包括插入、删除、移动、替换节点，以及更新属性、样式、文本内容等。
+3. 挂载组件：当遇到组件类型的 VNode 时，创建组件实例，执行组件的 setup 钩子、渲染函数，并递归处理子组件和子节点。
+4. 卸载组件：在组件销毁时，清除组件实例上的副作用（effects），移除 DOM 节点，释放资源。
+5. 跨平台支持：提供通用的接口和抽象层，使得渲染器可以在不同平台上使用，如客户端（browser renderer）和服务端（server renderer）。
+
+```ts
+function getSequence(arr: number[]): number[] {
+  const p = arr.slice();
+  const result = [0];
+  let i, j, u, v, c;
+  const len = arr.length;
+  for (i = 0; i < len; i++) {
+    const arrI = arr[i];
+    if (arrI !== 0) {
+      j = result[result.length - 1];
+      if (arr[j] < arrI) {
+        p[i] = j;
+        result.push(i);
+        continue;
+      }
+      u = 0;
+      v = result.length - 1;
+      while (u < v) {
+        c = (u + v) >> 1;
+        if (arr[result[c]] < arrI) {
+          u = c + 1;
+        } else {
+          v = c;
+        }
+      }
+      if (arrI < arr[result[u]]) {
+        if (u > 0) {
+          p[i] = result[u - 1];
+        }
+        result[u] = i;
+      }
+    }
+  }
+  u = result.length;
+  v = result[u - 1];
+  while (u-- > 0) {
+    result[u] = v;
+    v = p[v];
+  }
+  return result;
+}
+```
+
+
+
+1. 创建一个副本数组`p`，用于保存原数组中每个元素对应的LIS中的前一个元素的索引。
+2. 创建一个结果数组`result`，用于存储构成最长递增子序列的原始数组中的索引。
+3. 使用二分查找算法在结果数组中定位新加入元素的合适位置，使得结果数组始终保持递增排序。
+4. 循环遍历输入数组`arr`，依次将每个元素与当前结果数组进行比较，找到对应的最大递增子序列的位置并将该位置记录到`p`中。
+5. 最后反转并调整结果数组，使其成为从原数组中提取出的最长递增子序列的索引集合。
+
+这个函数是为了找最长上升子序列
+
+
+
+#### h.ts
+
+h函数实际上是调用的createVNode函数
+
+```ts
+export function h(type: any, propsOrChildren?: any, children?: any): VNode {
+  const l = arguments.length
+  if (l === 2) {
+    if (isObject(propsOrChildren) && !isArray(propsOrChildren)) {
+      // single vnode without props
+      if (isVNode(propsOrChildren)) {
+        return createVNode(type, null, [propsOrChildren])
+      }
+      // props without children
+      return createVNode(type, propsOrChildren)
+    } else {
+      // omit props
+      return createVNode(type, null, propsOrChildren)
+    }
+  } else {
+    if (l > 3) {
+      children = Array.prototype.slice.call(arguments, 2)
+    } else if (l === 3 && isVNode(children)) {
+      children = [children]
+    }
+    return createVNode(type, propsOrChildren, children)
+  }
+}
+```
+
+h函数支持多种形式
+
+```js
+// type only
+h('div')
+
+// type + props
+h('div', {})
+
+// type + omit props + children
+// Omit props does NOT support named slots
+h('div', []) // array
+h('div', 'foo') // text
+h('div', h('br')) // vnode
+h(Component, () => {}) // default slot
+
+// type + props + children
+h('div', {}, []) // array
+h('div', {}, 'foo') // text
+h('div', {}, h('br')) // vnode
+h(Component, {}, () => {}) // default slot
+h(Component, {}, {}) // named slots
+
+// named slots without props requires explicit `null` to avoid ambiguity
+h(Component, null, {})
+```
+
+因此有很多重载
+
+`h`函数接受三个参数：
+
+1. `type`：代表要创建的DOM元素类型，它可以是HTML元素标签名（如'button'），自定义元素标签名，或者是组件构造函数。对于特殊类型如`Fragment`、`Text`、`Comment`、`Teleport`和`Suspense`，`h`函数也能正确处理。
+2. `props`：一个对象，用于描述元素或组件的属性。这里的`RawProps`包含了标准的`VNodeProps`以及其他可能的原生DOM事件处理器。
+3. `children`：子节点，可以是字符串、数字、布尔值（它们会被转成文本节点）、VNode对象、VNode数组，或者是一个返回VNode的函数（默认插槽）。
+
+`h`函数的类型定义中提供了多种重载版本，以确保在各种不同场景下都能获得正确的类型推断。例如，当传递一个HTML元素标签名时，它会要求第二个参数可以是属性对象加上子节点，也可以仅是子节点。而对于组件类型，`h`函数会根据组件的类型和是否传入props进行进一步的类型细化。
+
+
+
+
+
+### api
+
+#### createApp
+
+```ts
+export function createAppAPI<HostElement>(
+  render: RootRenderFunction<HostElement>,
+  hydrate?: RootHydrateFunction,
+): CreateAppFunction<HostElement> {
+  return function createApp(rootComponent, rootProps = null) {
+    if (!isFunction(rootComponent)) {
+      rootComponent = extend({}, rootComponent)
+    }
+
+    if (rootProps != null && !isObject(rootProps)) {
+      __DEV__ && warn(`root props passed to app.mount() must be an object.`)
+      rootProps = null
+    }
+
+    const context = createAppContext()
+    const installedPlugins = new WeakSet()
+
+    let isMounted = false
+
+    const app: App = (context.app = {
+      _uid: uid++,
+      _component: rootComponent as ConcreteComponent,
+      _props: rootProps,
+      _container: null,
+      _context: context,
+      _instance: null,
+
+      version,
+
+      get config() {
+        return context.config
+      },
+
+      set config(v) {
+        if (__DEV__) {
+          warn(
+            `app.config cannot be replaced. Modify individual options instead.`,
+          )
+        }
+      },
+
+      use(plugin: Plugin, ...options: any[]) {
+        if (installedPlugins.has(plugin)) {
+          __DEV__ && warn(`Plugin has already been applied to target app.`)
+        } else if (plugin && isFunction(plugin.install)) {
+          installedPlugins.add(plugin)
+          plugin.install(app, ...options)
+        } else if (isFunction(plugin)) {
+          installedPlugins.add(plugin)
+          plugin(app, ...options)
+        } else if (__DEV__) {
+          warn(
+            `A plugin must either be a function or an object with an "install" ` +
+              `function.`,
+          )
+        }
+        return app
+      },
+
+      mixin(mixin: ComponentOptions) {
+        if (__FEATURE_OPTIONS_API__) {
+          if (!context.mixins.includes(mixin)) {
+            context.mixins.push(mixin)
+          } else if (__DEV__) {
+            warn(
+              'Mixin has already been applied to target app' +
+                (mixin.name ? `: ${mixin.name}` : ''),
+            )
+          }
+        } else if (__DEV__) {
+          warn('Mixins are only available in builds supporting Options API')
+        }
+        return app
+      },
+
+      component(name: string, component?: Component): any {
+        if (__DEV__) {
+          validateComponentName(name, context.config)
+        }
+        if (!component) {
+          return context.components[name]
+        }
+        if (__DEV__ && context.components[name]) {
+          warn(`Component "${name}" has already been registered in target app.`)
+        }
+        context.components[name] = component
+        return app
+      },
+
+      directive(name: string, directive?: Directive) {
+        if (__DEV__) {
+          validateDirectiveName(name)
+        }
+
+        if (!directive) {
+          return context.directives[name] as any
+        }
+        if (__DEV__ && context.directives[name]) {
+          warn(`Directive "${name}" has already been registered in target app.`)
+        }
+        context.directives[name] = directive
+        return app
+      },
+
+      mount(
+        rootContainer: HostElement,
+        isHydrate?: boolean,
+        namespace?: boolean | ElementNamespace,
+      ): any {
+        if (!isMounted) {
+          // #5571
+          if (__DEV__ && (rootContainer as any).__vue_app__) {
+            warn(
+              `There is already an app instance mounted on the host container.\n` +
+                ` If you want to mount another app on the same host container,` +
+                ` you need to unmount the previous app by calling \`app.unmount()\` first.`,
+            )
+          }
+          const vnode = createVNode(rootComponent, rootProps)
+          // store app context on the root VNode.
+          // this will be set on the root instance on initial mount.
+          vnode.appContext = context
+
+          if (namespace === true) {
+            namespace = 'svg'
+          } else if (namespace === false) {
+            namespace = undefined
+          }
+
+          // HMR root reload
+          if (__DEV__) {
+            context.reload = () => {
+              // casting to ElementNamespace because TS doesn't guarantee type narrowing
+              // over function boundaries
+              render(
+                cloneVNode(vnode),
+                rootContainer,
+                namespace as ElementNamespace,
+              )
+            }
+          }
+
+          if (isHydrate && hydrate) {
+            hydrate(vnode as VNode<Node, Element>, rootContainer as any)
+          } else {
+            render(vnode, rootContainer, namespace)
+          }
+          isMounted = true
+          app._container = rootContainer
+          // for devtools and telemetry
+          ;(rootContainer as any).__vue_app__ = app
+
+          if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
+            app._instance = vnode.component
+            devtoolsInitApp(app, version)
+          }
+
+          return getExposeProxy(vnode.component!) || vnode.component!.proxy
+        } else if (__DEV__) {
+          warn(
+            `App has already been mounted.\n` +
+              `If you want to remount the same app, move your app creation logic ` +
+              `into a factory function and create fresh app instances for each ` +
+              `mount - e.g. \`const createMyApp = () => createApp(App)\``,
+          )
+        }
+      },
+
+      unmount() {
+        if (isMounted) {
+          render(null, app._container)
+          if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
+            app._instance = null
+            devtoolsUnmountApp(app)
+          }
+          delete app._container.__vue_app__
+        } else if (__DEV__) {
+          warn(`Cannot unmount an app that is not mounted.`)
+        }
+      },
+
+      provide(key, value) {
+        if (__DEV__ && (key as string | symbol) in context.provides) {
+          warn(
+            `App already provides property with key "${String(key)}". ` +
+              `It will be overwritten with the new value.`,
+          )
+        }
+
+        context.provides[key as string | symbol] = value
+
+        return app
+      },
+
+      runWithContext(fn) {
+        currentApp = app
+        try {
+          return fn()
+        } finally {
+          currentApp = null
+        }
+      },
+    })
+
+    if (__COMPAT__) {
+      installAppCompatProperties(app, context, render)
+    }
+
+    return app
+  }
+}
+
+```
+
+分析：
+
+1. 函数签名：
+
+    Typescript
+
+    ```typescript
+    export function createAppAPI<HostElement>(
+      render: RootRenderFunction<HostElement>,
+      hydrate?: RootHydrateFunction,
+    ): CreateAppFunction<HostElement>
+    ```
+
+    这个函数接收两个参数：一个是渲染函数（RootRenderFunction），用于将虚拟DOM转换为真实DOM；另一个是可选的hydrate函数，用于服务端渲染的hydration过程。函数返回一个创建应用的工厂函数（CreateAppFunction），它允许用户创建新的Vue应用实例并指定宿主元素类型。
+
+2. 创建应用函数内部：
+
+    Typescript
+
+    ```typescript
+    return function createApp(rootComponent, rootProps = null) {...}
+    ```
+
+    定义了一个内部闭包函数`createApp`，它接收两个参数：根组件（rootComponent）和根组件的初始属性（rootProps）。此函数负责创建并返回一个包含多个方法的应用实例对象（`app`）。
+
+3. 应用实例对象`app`具有以下关键方法和属性：
+
+    - `mount`: 挂载应用到指定的DOM容器（HostElement），可以选择是否执行 hydration。在这个过程中，会创建根VNode（虚拟DOM节点），设置上下文环境，然后根据情况调用render函数或hydrate函数进行实际的DOM操作。挂载成功后，会设置实例的一些必要属性，比如_app_context_和_container_等，并启动开发工具和HMR（热模块替换）支持。
+    - `unmount`: 卸载应用，清除已挂载的DOM内容及相关状态。
+    - `use`: 注册并应用插件到当前应用实例。
+    - `mixin`: 向应用添加全局混合选项（mixin）。
+    - `component`, `directive`: 注册全局组件和全局指令。
+    - `provide`: 提供注入到后代组件的作用域内变量。
+    - `runWithContext`: 在特定应用上下文中运行给定函数。
+    - 其他一些辅助方法，如配置获取和验证、版本检查等。
+
+在mount的时候，基于根组件创建vnode；然后调用render，基于vnode进行渲染创建
+
+
+
+
+
+`createAppAPI`在`render.ts`中使用。
+
+有关createAPP流程
+
+Vue3运行时从调用`createApp`开始，会依次触发以下重要函数：
+
+1. `createApp`：
+
+    Javascript
+
+    ```javascript
+    import { createApp } from 'vue'
+    const app = createApp(App)
+    ```
+
+    这个函数会创建一个Vue应用实例，并且初始化应用的全局配置以及相关选项合并策略。同时，Vue3中的`setup`函数取代了Vue2的部分生命周期钩子。
+
+2. `app.use` / `app.mixin` / `app.component` / `app.directive`： 这些方法用于注册全局插件、混入、组件和自定义指令。
+
+3. `app.mount`：
+
+    Javascript
+
+    ```javascript
+    app.mount('#app')
+    ```
+
+    调用`mount`方法时，Vue3会执行以下步骤：
+
+    - 创建根组件实例，此时会调用`setup`函数（如果存在）。
+    - 针对`setup`函数内部的响应式状态，通过`reactive`、`ref`、`computed`等API进行代理和观测。
+    - 触发组件树的挂载过程，这个阶段没有Vue2的`beforeCreate`和`created`钩子，但`setup`函数内可使用`onBeforeMount`、`onMounted`等新的生命周期钩子。
+    - Vue3的渲染函数(`render`)会被执行，基于渲染函数或者模板生成虚拟DOM并将其渲染到实际DOM中。
+
+4. 组件更新过程： 状态变化时，Vue3会触发组件的`onBeforeUpdate`和`onUpdated`生命周期钩子，并通过其优化的响应式系统（如`proxy`和`effect`）来追踪依赖并高效地更新视图。
+
+5. 销毁过程： 当组件卸载时，Vue3会触发`onBeforeUnmount`和`onUnmounted`生命周期钩子，并清理相关资源。
+
+
+
+
+
+#### inject.ts
+
+这个文件实现了provide和inject方法。
+
+```ts
+import { isFunction } from '@vue/shared'
+import { currentInstance } from './component'
+import { currentRenderingInstance } from './componentRenderContext'
+import { currentApp } from './apiCreateApp'
+import { warn } from './warning'
+
+export interface InjectionKey<T> extends Symbol {}
+
+export function provide<T, K = InjectionKey<T> | string | number>(
+  key: K,
+  value: K extends InjectionKey<infer V> ? V : T,
+) {
+  if (!currentInstance) {
+    if (__DEV__) {
+      warn(`provide() can only be used inside setup().`)
+    }
+  } else {
+    let provides = currentInstance.provides
+    // by default an instance inherits its parent's provides object
+    // but when it needs to provide values of its own, it creates its
+    // own provides object using parent provides object as prototype.
+    // this way in `inject` we can simply look up injections from direct
+    // parent and let the prototype chain do the work.
+    const parentProvides =
+      currentInstance.parent && currentInstance.parent.provides
+    if (parentProvides === provides) {
+      provides = currentInstance.provides = Object.create(parentProvides)
+    }
+    // TS doesn't allow symbol as index type
+    provides[key as string] = value
+  }
+}
+
+export function inject<T>(key: InjectionKey<T> | string): T | undefined
+export function inject<T>(
+  key: InjectionKey<T> | string,
+  defaultValue: T,
+  treatDefaultAsFactory?: false,
+): T
+export function inject<T>(
+  key: InjectionKey<T> | string,
+  defaultValue: T | (() => T),
+  treatDefaultAsFactory: true,
+): T
+export function inject(
+  key: InjectionKey<any> | string,
+  defaultValue?: unknown,
+  treatDefaultAsFactory = false,
+) {
+  // fallback to `currentRenderingInstance` so that this can be called in
+  // a functional component
+  const instance = currentInstance || currentRenderingInstance
+
+  // also support looking up from app-level provides w/ `app.runWithContext()`
+  if (instance || currentApp) {
+    // #2400
+    // to support `app.use` plugins,
+    // fallback to appContext's `provides` if the instance is at root
+    const provides = instance
+      ? instance.parent == null
+        ? instance.vnode.appContext && instance.vnode.appContext.provides
+        : instance.parent.provides
+      : currentApp!._context.provides
+
+    if (provides && (key as string | symbol) in provides) {
+      // TS doesn't allow symbol as index type
+      return provides[key as string]
+    } else if (arguments.length > 1) {
+      return treatDefaultAsFactory && isFunction(defaultValue)
+        ? defaultValue.call(instance && instance.proxy)
+        : defaultValue
+    } else if (__DEV__) {
+      warn(`injection "${String(key)}" not found.`)
+    }
+  } else if (__DEV__) {
+    warn(`inject() can only be used inside setup() or functional components.`)
+  }
+}
+
+/**
+ * Returns true if `inject()` can be used without warning about being called in the wrong place (e.g. outside of
+ * setup()). This is used by libraries that want to use `inject()` internally without triggering a warning to the end
+ * user. One example is `useRoute()` in `vue-router`.
+ */
+export function hasInjectionContext(): boolean {
+  return !!(currentInstance || currentRenderingInstance || currentApp)
+}
+
+```
+
+provide
+
+- 如果当前存在组件实例，则获取当前实例的`provides`对象。`provides`对象用于储存当前组件向上提供的依赖。
+- 然后检查父级组件是否也提供了同样的`provides`对象，如果是，为了避免覆盖父级提供的依赖，创建一个新的`provides`对象，并以父级的`provides`对象为原型，这样子组件可以通过原型链查找到祖先组件提供的依赖
+- 最后，将提供的键值对存入当前组件的`provides`对象中。这里由于TypeScript不支持symbol作为索引类型，所以强制将键类型转换为`string`。
+
+相当于在当前实例上的`provides`对象中添加一个属性
+
+inject
+
+- 函数内部首先判断当前是否有组件实例或应用实例。如果有，它会沿着组件树向上查找提供的依赖项。查找范围包括组件自身的`provides`、父组件的`provides`，甚至在根组件级别查找应用级别的`provides`。
+- 如果没有找到匹配的键值，函数会根据`treatDefaultAsFactory`的值和提供的默认值类型，选择返回默认值或是调用默认值工厂函数。
+
+
+
+
+
+
+
+
+
+#### watch.ts
+
+核心——dowatch，作用：实现响应式观察者（Watcher）功能
+
+```ts
+function doWatch(
+  source: WatchSource | WatchSource[] | WatchEffect | object,
+  cb: WatchCallback | null,
+  {
+    immediate,
+    deep,
+    flush,
+    once,
+    onTrack,
+    onTrigger,
+  }: WatchOptions = EMPTY_OBJ,
+): WatchStopHandle {
+  if (cb && once) {
+    const _cb = cb
+    cb = (...args) => {
+      _cb(...args)
+      unwatch()
+    }
+  }
+
+  // TODO remove in 3.5
+  
+
+  const warnInvalidSource = (s: unknown) => {
+    warn(
+      `Invalid watch source: `,
+      s,
+      `A watch source can only be a getter/effect function, a ref, ` +
+        `a reactive object, or an array of these types.`,
+    )
+  }
+
+  const instance = currentInstance
+  const reactiveGetter = (source: object) =>
+    deep === true
+      ? source // traverse will happen in wrapped getter below
+      : // for deep: false, only traverse root-level properties
+        traverse(source, deep === false ? 1 : undefined)
+
+  let getter: () => any
+  let forceTrigger = false
+  let isMultiSource = false
+
+  if (isRef(source)) {
+    getter = () => source.value
+    forceTrigger = isShallow(source)
+  } else if (isReactive(source)) {
+    getter = () => reactiveGetter(source)
+    forceTrigger = true
+  } else if (isArray(source)) {
+    isMultiSource = true
+    forceTrigger = source.some(s => isReactive(s) || isShallow(s))
+    getter = () =>
+      source.map(s => {
+        if (isRef(s)) {
+          return s.value
+        } else if (isReactive(s)) {
+          return reactiveGetter(s)
+        } else if (isFunction(s)) {
+          return callWithErrorHandling(s, instance, ErrorCodes.WATCH_GETTER)
+        } else {
+          __DEV__ && warnInvalidSource(s)
+        }
+      })
+  } else if (isFunction(source)) {
+    if (cb) {
+      // getter with cb
+      getter = () =>
+        callWithErrorHandling(source, instance, ErrorCodes.WATCH_GETTER)
+    } else {
+      // no cb -> simple effect
+      getter = () => {
+        if (cleanup) {
+          cleanup()
+        }
+        return callWithAsyncErrorHandling(
+          source,
+          instance,
+          ErrorCodes.WATCH_CALLBACK,
+          [onCleanup],
+        )
+      }
+    }
+  } else {
+    getter = NOOP
+    __DEV__ && warnInvalidSource(source)
+  }
+
+  // 2.x array mutation watch compat
+  if (__COMPAT__ && cb && !deep) {
+    const baseGetter = getter
+    getter = () => {
+      const val = baseGetter()
+      if (
+        isArray(val) &&
+        checkCompatEnabled(DeprecationTypes.WATCH_ARRAY, instance)
+      ) {
+        traverse(val)
+      }
+      return val
+    }
+  }
+
+  if (cb && deep) {
+    const baseGetter = getter
+    getter = () => traverse(baseGetter())
+  }
+
+  let cleanup: (() => void) | undefined
+  let onCleanup: OnCleanup = (fn: () => void) => {
+    cleanup = effect.onStop = () => {
+      callWithErrorHandling(fn, instance, ErrorCodes.WATCH_CLEANUP)
+      cleanup = effect.onStop = undefined
+    }
+  }
+
+  // in SSR there is no need to setup an actual effect, and it should be noop
+  // unless it's eager or sync flush
+  let ssrCleanup: (() => void)[] | undefined
+  if (__SSR__ && isInSSRComponentSetup) {
+    // we will also not call the invalidate callback (+ runner is not set up)
+    onCleanup = NOOP
+    if (!cb) {
+      getter()
+    } else if (immediate) {
+      callWithAsyncErrorHandling(cb, instance, ErrorCodes.WATCH_CALLBACK, [
+        getter(),
+        isMultiSource ? [] : undefined,
+        onCleanup,
+      ])
+    }
+    if (flush === 'sync') {
+      const ctx = useSSRContext()!
+      ssrCleanup = ctx.__watcherHandles || (ctx.__watcherHandles = [])
+    } else {
+      return NOOP
+    }
+  }
+
+  let oldValue: any = isMultiSource
+    ? new Array((source as []).length).fill(INITIAL_WATCHER_VALUE)
+    : INITIAL_WATCHER_VALUE
+  const job: SchedulerJob = () => {
+    if (!effect.active || !effect.dirty) {
+      return
+    }
+    if (cb) {
+      // watch(source, cb)
+      const newValue = effect.run()
+      if (
+        deep ||
+        forceTrigger ||
+        (isMultiSource
+          ? (newValue as any[]).some((v, i) => hasChanged(v, oldValue[i]))
+          : hasChanged(newValue, oldValue)) ||
+        (__COMPAT__ &&
+          isArray(newValue) &&
+          isCompatEnabled(DeprecationTypes.WATCH_ARRAY, instance))
+      ) {
+        // cleanup before running cb again
+        if (cleanup) {
+          cleanup()
+        }
+        callWithAsyncErrorHandling(cb, instance, ErrorCodes.WATCH_CALLBACK, [
+          newValue,
+          // pass undefined as the old value when it's changed for the first time
+          oldValue === INITIAL_WATCHER_VALUE
+            ? undefined
+            : isMultiSource && oldValue[0] === INITIAL_WATCHER_VALUE
+              ? []
+              : oldValue,
+          onCleanup,
+        ])
+        oldValue = newValue
+      }
+    } else {
+      // watchEffect
+      effect.run()
+    }
+  }
+
+  // important: mark the job as a watcher callback so that scheduler knows
+  // it is allowed to self-trigger (#1727)
+  job.allowRecurse = !!cb
+
+  let scheduler: EffectScheduler
+  if (flush === 'sync') {
+    scheduler = job as any // the scheduler function gets called directly
+  } else if (flush === 'post') {
+    scheduler = () => queuePostRenderEffect(job, instance && instance.suspense)
+  } else {
+    // default: 'pre'
+    job.pre = true
+    if (instance) job.id = instance.uid
+    scheduler = () => queueJob(job)
+  }
+
+  const effect = new ReactiveEffect(getter, NOOP, scheduler)
+
+  const scope = getCurrentScope()
+  const unwatch = () => {
+    effect.stop()
+    if (scope) {
+      remove(scope.effects, effect)
+    }
+  }
+
+  if (__DEV__) {
+    effect.onTrack = onTrack
+    effect.onTrigger = onTrigger
+  }
+
+  // initial run
+  if (cb) {
+    if (immediate) {
+      job()
+    } else {
+      oldValue = effect.run()
+    }
+  } else if (flush === 'post') {
+    queuePostRenderEffect(
+      effect.run.bind(effect),
+      instance && instance.suspense,
+    )
+  } else {
+    effect.run()
+  }
+
+  if (__SSR__ && ssrCleanup) ssrCleanup.push(unwatch)
+  return unwatch
+}
+```
+
+1. 函数接受五个参数：
+    - `source`：观察的目标源，可以是getter函数、ref、reactive对象、effect函数或这些类型的数组。
+    - `cb`：变化时执行的回调函数。
+    - `options`：包含`immediate`（是否立即执行一次回调）、`deep`（是否深度监听）、`flush`（调度策略，如同步、异步预渲染或后渲染）、`once`（是否只执行一次）及两个用于调试的钩子函数`onTrack`和`onTrigger`的选项对象。
+2. 首先处理一次性监听的情况，即如果设置了`once`选项，那么在回调执行后自动停止监听。
+3. 接着，根据`source`的不同类型，设置对应的getter函数。getter函数负责获取目标源的最新值，如果是深度监听（`deep=true`），getter会对嵌套对象进行遍历获取深层属性的值。
+4. 初始化旧值`oldValue`，如果是多源数组，则初始化为长度相等的新数组，每个元素值为`INITIAL_WATCHER_VALUE`。
+5. 定义`job`函数作为调度任务，当目标源发生变化时，该函数会被执行。它会对比新旧值，如果满足变更条件（如值改变、深度监听或首次执行），则调用回调函数`cb`并更新旧值。
+6. 创建一个`ReactiveEffect`实例，传入getter、noop函数和调度器函数，`ReactiveEffect`是Vue3内部实现响应式的核心类，它负责执行getter获取最新的值并调度更新。
+7. 对于不同的`flush`策略，设置不同的调度器函数，如同步、异步预渲染或后渲染。
+8. 在函数末尾，根据`immediate`和`flush`选项执行`job`函数。如果是立即执行，会直接调用`job`；否则，根据调度策略将其加入到合适的队列中等待执行。
+9. `doWatch`函数返回一个停止监听的函数`unwatch`，用于在适当的时候停止对目标源的观察。
+10. 整个过程在SSR（服务器端渲染）模式下会有特别处理，避免在服务器端执行不必要的副作用。
+
+
+
+
+
+```ts
+export function watchEffect(
+  effect: WatchEffect,
+  options?: WatchOptionsBase,
+): WatchStopHandle {
+  return doWatch(effect, null, options)
+}
+```
+
+这个函数背后还是调用的doWatch
+
+`watchEffect` 的机制是它会收集在首次运行时所有被访问过的响应式属性作为依赖，并在这些依赖发生变化时再次运行该函数
+
+watch不能直接监视一个基本类型（非响应式），当你试图直接监听一个基础类型的值时，Vue 并不能跟踪到这个值的变化，因为基本类型的值在内存中是直接替换而不是修改的。
+
+
+
+
+
+## compile——编译相关
+
+模版编译相关流程
+
+1. **解析模板**
+    - Vue 使用一个解析器将模板字符串转换成抽象语法树（AST）结构。这包括调用一系列分析函数，例如识别标签、属性、插槽、指令等。
+2. **转换 AST**
+    - 在得到初步的 AST 之后，编译器会遍历这个树并对其进行优化和转换。例如：
+        - 处理动态绑定、v-if/v-for 这类指令；
+        - 分析作用域插槽和默认插槽；
+        - 解析过滤器、计算属性等。
+3. **生成代码**
+    - 转换后的 AST 将被用来生成 JavaScript 代码，这就是上述 `generate` 函数的主要工作。此函数接收经过处理的 AST 作为输入，并基于它生成渲染函数的源码。
+    - 在生成代码阶段，会调用类似 `genNode` 这样的递归函数去遍历 AST 并生成对应的 JavaScript 表达式。
+4. **构建渲染函数**
+    - 最终生成的渲染函数会包含一个可以生成虚拟 DOM（VNode）树的函数体，当组件实例化时，这个渲染函数会被调用，依据数据状态生成实际的视图。
+5. **编译选项与钩子**
+    - 整个过程中允许用户通过编译选项影响编译过程，比如自定义指令、组件、过滤器的处理方式，或者在特定阶段注入自定义逻辑（如 `onContextCreated` 钩子）。
+
+### 转化为ast
+
+#### compile.ts
+
+```ts
+export function baseCompile(
+  source: string | RootNode,
+  options: CompilerOptions = {},
+): CodegenResult {
+  const onError = options.onError || defaultOnError
+  const isModuleMode = options.mode === 'module'
+  /* istanbul ignore if */
+  if (__BROWSER__) {
+    if (options.prefixIdentifiers === true) {
+      onError(createCompilerError(ErrorCodes.X_PREFIX_ID_NOT_SUPPORTED))
+    } else if (isModuleMode) {
+      onError(createCompilerError(ErrorCodes.X_MODULE_MODE_NOT_SUPPORTED))
+    }
+  }
+
+  const prefixIdentifiers =
+    !__BROWSER__ && (options.prefixIdentifiers === true || isModuleMode)
+  if (!prefixIdentifiers && options.cacheHandlers) {
+    onError(createCompilerError(ErrorCodes.X_CACHE_HANDLER_NOT_SUPPORTED))
+  }
+  if (options.scopeId && !isModuleMode) {
+    onError(createCompilerError(ErrorCodes.X_SCOPE_ID_NOT_SUPPORTED))
+  }
+
+  const resolvedOptions = extend({}, options, {
+    prefixIdentifiers,
+  })
+  const ast = isString(source) ? baseParse(source, resolvedOptions) : source
+  const [nodeTransforms, directiveTransforms] =
+    getBaseTransformPreset(prefixIdentifiers)
+
+  if (!__BROWSER__ && options.isTS) {
+    const { expressionPlugins } = options
+    if (!expressionPlugins || !expressionPlugins.includes('typescript')) {
+      options.expressionPlugins = [...(expressionPlugins || []), 'typescript']
+    }
+  }
+
+  transform(
+    ast,
+    extend({}, resolvedOptions, {
+      nodeTransforms: [
+        ...nodeTransforms,
+        ...(options.nodeTransforms || []), // user transforms
+      ],
+      directiveTransforms: extend(
+        {},
+        directiveTransforms,
+        options.directiveTransforms || {}, // user transforms
+      ),
+    }),
+  )
+
+  return generate(ast, resolvedOptions)
+}
+
+```
+
+
+
+1. **初始化选项与错误处理**：
+    - 函数接受两个参数：`source`（待编译的源代码或已经解析成的抽象语法树），以及一个可选的配置对象 `options`。
+    - 初始化错误处理函数，若未指定则使用默认的 `defaultOnError` 函数。
+    - 判断是否处于模块模式（`module` mode）以及是否在浏览器环境下执行，根据不同情况抛出特定的错误，比如在浏览器环境下不支持某些编译选项。
+2. **确定编译选项**：
+    - 根据给定的选项计算最终使用的 `prefixIdentifiers` 值，即标识符是否需要前缀以便避免全局作用域冲突。
+    - 对于不支持的选项组合，如非模块模式下启用 `scopeId` 或在启用缓存处理器 (`cacheHandlers`) 但未开启标识符前缀时，同样抛出错误。
+3. **合并并扩展编译选项**：
+    - 使用传入的 `options` 合并并扩展成新的 `resolvedOptions` 对象，包含已确定的 `prefixIdentifiers` 设置。
+4. **解析或处理源代码**：
+    - 如果 `source` 是字符串，则使用 `baseParse` 函数将其解析为抽象语法树（AST）。
+    - 获取基础的节点转换集 (`nodeTransforms`) 和指令转换集 (`directiveTransforms`)，这些转换会在后续步骤中应用到AST上。
+5. **处理TypeScript插件**：
+    - 若不是在浏览器环境下且开启了TypeScript支持，检查并确保相关的插件已经被添加到表达式插件列表中。
+6. **应用转换**：
+    - 使用 `transform` 函数递归遍历和转换抽象语法树，包括基础转换和用户自定义的节点转换以及指令转换。
+7. **生成代码**：
+    - 最后，使用 `generate` 函数将经过转换后的抽象语法树转化为目标JavaScript代码片段，即编译的结果。
+
+
+
+```ts
+function reset() {
+  tokenizer.reset()
+  currentOpenTag = null
+  currentProp = null
+  currentAttrValue = ''
+  currentAttrStartIndex = -1
+  currentAttrEndIndex = -1
+  stack.length = 0
+}
+
+export function baseParse(input: string, options?: ParserOptions): RootNode {
+  reset()
+  currentInput = input
+  currentOptions = extend({}, defaultParserOptions)
+
+  if (options) {
+    let key: keyof ParserOptions
+    for (key in options) {
+      if (options[key] != null) {
+        // @ts-expect-error
+        currentOptions[key] = options[key]
+      }
+    }
+  }
+
+  if (__DEV__) {
+    if (!__BROWSER__ && currentOptions.decodeEntities) {
+      console.warn(
+        `[@vue/compiler-core] decodeEntities option is passed but will be ` +
+          `ignored in non-browser builds.`,
+      )
+    } else if (__BROWSER__ && !currentOptions.decodeEntities) {
+      throw new Error(
+        `[@vue/compiler-core] decodeEntities option is required in browser builds.`,
+      )
+    }
+  }
+
+  tokenizer.mode =
+    currentOptions.parseMode === 'html'
+      ? ParseMode.HTML
+      : currentOptions.parseMode === 'sfc'
+        ? ParseMode.SFC
+        : ParseMode.BASE
+
+  tokenizer.inXML =
+    currentOptions.ns === Namespaces.SVG ||
+    currentOptions.ns === Namespaces.MATH_ML
+
+  const delimiters = options?.delimiters
+  if (delimiters) {
+    tokenizer.delimiterOpen = toCharCodes(delimiters[0])
+    tokenizer.delimiterClose = toCharCodes(delimiters[1])
+  }
+
+  const root = (currentRoot = createRoot([], input))
+  tokenizer.parse(currentInput)
+  root.loc = getLoc(0, input.length)
+  root.children = condenseWhitespace(root.children)
+  currentRoot = null
+  return root
+}
+```
+
+通过模版字符串转化为ast语法树
+
+1. **创建AST根节点**：
+    - 创建一个 `RootNode` 对象作为AST的根节点，并关联输入字符串的基本信息。
+2. **解析输入字符串**：
+    - 调用 `tokenizer.parse(currentInput)` 开始实际解析过程，将输入字符串转换成AST节点。
+3. **设置位置信息和优化子节点**：
+    - 给根节点设置准确的位置信息（行号、列号等）。
+    - 对AST的子节点进行处理，例如通过 `condenseWhitespace` 函数可能去除不必要的空白字符以优化 AST。
+4. **清理状态并返回AST**：
+    - 清除内部临时引用，然后返回构建好的AST根节点。
+
+
+
+### 生成代码
+
+通过generate生成render函数代码
+
+
+
+```ts
+export function generate(
+  ast: RootNode,
+  options: CodegenOptions & {
+    onContextCreated?: (context: CodegenContext) => void
+  } = {},
+): CodegenResult {
+  const context = createCodegenContext(ast, options)
+  if (options.onContextCreated) options.onContextCreated(context)
+  const {
+    mode,
+    push,
+    prefixIdentifiers,
+    indent,
+    deindent,
+    newline,
+    scopeId,
+    ssr,
+  } = context
+
+  const helpers = Array.from(ast.helpers)
+  const hasHelpers = helpers.length > 0
+  const useWithBlock = !prefixIdentifiers && mode !== 'module'
+  const genScopeId = !__BROWSER__ && scopeId != null && mode === 'module'
+  const isSetupInlined = !__BROWSER__ && !!options.inline
+
+  // preambles
+  // in setup() inline mode, the preamble is generated in a sub context
+  // and returned separately.
+  const preambleContext = isSetupInlined
+    ? createCodegenContext(ast, options)
+    : context
+  if (!__BROWSER__ && mode === 'module') {
+    genModulePreamble(ast, preambleContext, genScopeId, isSetupInlined)
+  } else {
+    genFunctionPreamble(ast, preambleContext)
+  }
+  // enter render function
+  const functionName = ssr ? `ssrRender` : `render`
+  const args = ssr ? ['_ctx', '_push', '_parent', '_attrs'] : ['_ctx', '_cache']
+  if (!__BROWSER__ && options.bindingMetadata && !options.inline) {
+    // binding optimization args
+    args.push('$props', '$setup', '$data', '$options')
+  }
+  const signature =
+    !__BROWSER__ && options.isTS
+      ? args.map(arg => `${arg}: any`).join(',')
+      : args.join(', ')
+
+  if (isSetupInlined) {
+    push(`(${signature}) => {`)
+  } else {
+    push(`function ${functionName}(${signature}) {`)
+  }
+  indent()
+
+  if (useWithBlock) {
+    push(`with (_ctx) {`)
+    indent()
+    // function mode const declarations should be inside with block
+    // also they should be renamed to avoid collision with user properties
+    if (hasHelpers) {
+      push(
+        `const { ${helpers.map(aliasHelper).join(', ')} } = _Vue\n`,
+        NewlineType.End,
+      )
+      newline()
+    }
+  }
+
+  // generate asset resolution statements
+  if (ast.components.length) {
+    genAssets(ast.components, 'component', context)
+    if (ast.directives.length || ast.temps > 0) {
+      newline()
+    }
+  }
+  if (ast.directives.length) {
+    genAssets(ast.directives, 'directive', context)
+    if (ast.temps > 0) {
+      newline()
+    }
+  }
+  if (__COMPAT__ && ast.filters && ast.filters.length) {
+    newline()
+    genAssets(ast.filters, 'filter', context)
+    newline()
+  }
+
+  if (ast.temps > 0) {
+    push(`let `)
+    for (let i = 0; i < ast.temps; i++) {
+      push(`${i > 0 ? `, ` : ``}_temp${i}`)
+    }
+  }
+  if (ast.components.length || ast.directives.length || ast.temps) {
+    push(`\n`, NewlineType.Start)
+    newline()
+  }
+
+  // generate the VNode tree expression
+  if (!ssr) {
+    push(`return `)
+  }
+  if (ast.codegenNode) {
+    genNode(ast.codegenNode, context)
+  } else {
+    push(`null`)
+  }
+
+  if (useWithBlock) {
+    deindent()
+    push(`}`)
+  }
+
+  deindent()
+  push(`}`)
+
+  return {
+    ast,
+    code: context.code,
+    preamble: isSetupInlined ? preambleContext.code : ``,
+    map: context.map ? context.map.toJSON() : undefined,
+  }
+}
+```
+
+
+
+
+
+1. **创建代码生成上下文**：根据输入的AST和选项创建一个 `CodegenContext` 对象，其中包含了各种辅助方法和状态，如 `push`（向结果字符串中添加内容的方法）、`indent/deindent`（用于缩进控制）、`mode`（当前编译模式）等。
+    1. 通过传入的参数ast和options创建一个codegenContext对象
+    2. 并且放入了一些方法，push（将新的代码添加到现有代码上），indent（增加缩进层次），deindent（减少缩进层次），newline（添加一个换行符并更新行号和列号信息）。
+2. **生成函数签名**：根据不同的编译模式（SSR或普通渲染）和选项，决定生成的函数名称（如 `render` 或 `ssrRender`），以及函数参数列表。
+3. **生成前置代码段**：根据模式选择生成模块前缀代码（`genModulePreamble`）或函数前缀代码（`genFunctionPreamble`）。
+4. **进入渲染函数体**：开始定义渲染函数主体，并根据是否内联设置（`inline`）和类型脚本（TS）模式调整函数签名。
+5. **处理with语句**：如果不在模块模式或启用了 `prefixIdentifiers`，则使用 `with` 语句包裹内部代码，以减少上下文引用时的重复写法，并导入必要的帮助函数。
+6. **资产声明**：生成组件、指令和其他资源的注册代码。
+7. **临时变量声明**：如果AST中包含临时变量（`temps`），则声明它们。
+8. **生成VNode树**：生成对应于AST节点的JavaScript代码，将Vue组件模板转换为JavaScript表达式，最终生成VNode树。
+9. **闭合函数体**：关闭 `with` 语句块（如果有的话）和渲染函数主体。
+10. **返回结果**：返回一个对象，其中包括原始的AST，生成的JavaScript代码字符串，以及在内联设置模式下的额外前置代码字符串（`preamble`）。同时，如果存在映射关系，还会返回一个SourceMap对象。
+
+
+
+## runtime-dom——渲染器
+
+#### createApp
+
+```ts
+export const createApp = ((...args) => {
+  const app = ensureRenderer().createApp(...args)
+
+  if (__DEV__) {
+    injectNativeTagCheck(app)
+    injectCompilerOptionsCheck(app)
+  }
+
+  const { mount } = app
+  app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
+    const container = normalizeContainer(containerOrSelector)
+    if (!container) return
+
+    const component = app._component
+    if (!isFunction(component) && !component.render && !component.template) {
+      // __UNSAFE__
+      // Reason: potential execution of JS expressions in in-DOM template.
+      // The user must make sure the in-DOM template is trusted. If it's
+      // rendered by the server, the template should not contain any user data.
+      component.template = container.innerHTML
+      // 2.x compat check
+      if (__COMPAT__ && __DEV__) {
+        for (let i = 0; i < container.attributes.length; i++) {
+          const attr = container.attributes[i]
+          if (attr.name !== 'v-cloak' && /^(v-|:|@)/.test(attr.name)) {
+            compatUtils.warnDeprecation(
+              DeprecationTypes.GLOBAL_MOUNT_CONTAINER,
+              null,
+            )
+            break
+          }
+        }
+      }
+    }
+
+    // clear content before mounting
+    container.innerHTML = ''
+    const proxy = mount(container, false, resolveRootNamespace(container))
+    if (container instanceof Element) {
+      container.removeAttribute('v-cloak')
+      container.setAttribute('data-v-app', '')
+    }
+    return proxy
+  }
+
+  return app
+}) as CreateAppFunction<Element>
+
+      
+function ensureRenderer() {
+  return (
+    renderer ||
+    (renderer = createRenderer<Node, Element | ShadowRoot>(rendererOptions))
+  )
+}
+```
+
+这一堆是和创建app有关
+
+1. **创建渲染器**：首先调用 `ensureRenderer()` 函数来确保至少创建了一个渲染器实例。渲染器负责将Vue组件转换为DOM元素，并在必要时进行更新。
+2. **创建应用实例**：使用渲染器的 `createApp` 方法创建一个应用实例，传入的参数 `args` 通常是一个组件构造函数或组件选项对象。
+3. **开发环境检查**：在开发环境下，注入一些检查函数，如 `injectNativeTagCheck` 和 `injectCompilerOptionsCheck`，用于检测潜在的问题和警告。
+4. **重写挂载方法**：覆盖原生的 `mount` 方法，新方法首先规范化传入的挂载容器（`containerOrSelector`），然后执行以下操作：
+    - 检查是否存在组件构造函数或有效的模板，如果没有，尝试从挂载容器的innerHTML提取模板（这是一个不安全的操作，只应在信任的环境中使用）。
+    - 清空挂载容器的内容，以避免重复渲染。
+    - 调用原有的 `mount` 方法，将组件挂载到容器上，并返回代理对象（proxy）。
+    - 在挂载完成后，移除容器上的 `v-cloak` 属性，添加 `data-v-app` 属性，用于Vue的一些样式和行为。
+5. **返回应用实例**：最后，返回增强过的应用实例，用户可以继续使用 `.mount()` 方法将应用挂载到指定的DOM元素上，也可以使用 `.use()` 方法安装插件，以及其他Vue应用实例的方法和属性。
+
+nodeOps与创建各种节点相关。
+
+```ts
+import type { RendererOptions } from '@vue/runtime-core'
+
+export const svgNS = 'http://www.w3.org/2000/svg'
+export const mathmlNS = 'http://www.w3.org/1998/Math/MathML'
+
+const doc = (typeof document !== 'undefined' ? document : null) as Document
+
+const templateContainer = doc && /*#__PURE__*/ doc.createElement('template')
+
+export const nodeOps: Omit<RendererOptions<Node, Element>, 'patchProp'> = {
+  insert: (child, parent, anchor) => {
+    parent.insertBefore(child, anchor || null)
+  },
+
+  remove: child => {
+    const parent = child.parentNode
+    if (parent) {
+      parent.removeChild(child)
+    }
+  },
+
+  createElement: (tag, namespace, is, props): Element => {
+    const el =
+      namespace === 'svg'
+        ? doc.createElementNS(svgNS, tag)
+        : namespace === 'mathml'
+          ? doc.createElementNS(mathmlNS, tag)
+          : doc.createElement(tag, is ? { is } : undefined)
+
+    if (tag === 'select' && props && props.multiple != null) {
+      ;(el as HTMLSelectElement).setAttribute('multiple', props.multiple)
+    }
+
+    return el
+  },
+
+  createText: text => doc.createTextNode(text),
+
+  createComment: text => doc.createComment(text),
+
+  setText: (node, text) => {
+    node.nodeValue = text
+  },
+
+  setElementText: (el, text) => {
+    el.textContent = text
+  },
+
+  parentNode: node => node.parentNode as Element | null,
+
+  nextSibling: node => node.nextSibling,
+
+  querySelector: selector => doc.querySelector(selector),
+
+  setScopeId(el, id) {
+    el.setAttribute(id, '')
+  },
+
+  // __UNSAFE__
+  // Reason: innerHTML.
+  // Static content here can only come from compiled templates.
+  // As long as the user only uses trusted templates, this is safe.
+  insertStaticContent(content, parent, anchor, namespace, start, end) {
+    // <parent> before | first ... last | anchor </parent>
+    const before = anchor ? anchor.previousSibling : parent.lastChild
+    // #5308 can only take cached path if:
+    // - has a single root node
+    // - nextSibling info is still available
+    if (start && (start === end || start.nextSibling)) {
+      // cached
+      while (true) {
+        parent.insertBefore(start!.cloneNode(true), anchor)
+        if (start === end || !(start = start!.nextSibling)) break
+      }
+    } else {
+      // fresh insert
+      templateContainer.innerHTML =
+        namespace === 'svg'
+          ? `<svg>${content}</svg>`
+          : namespace === 'mathml'
+            ? `<math>${content}</math>`
+            : content
+
+      const template = templateContainer.content
+      if (namespace === 'svg' || namespace === 'mathml') {
+        // remove outer svg/math wrapper
+        const wrapper = template.firstChild!
+        while (wrapper.firstChild) {
+          template.appendChild(wrapper.firstChild)
+        }
+        template.removeChild(wrapper)
+      }
+      parent.insertBefore(template, anchor)
+    }
+    return [
+      // first
+      before ? before.nextSibling! : parent.firstChild!,
+      // last
+      anchor ? anchor.previousSibling! : parent.lastChild!,
+    ]
+  },
+}
+
+```
+
+
+
+### 大概流程
+
+创建模版流程<span id="ProcessInitGoBack">大概流程</span>，配合文章头部的[流程图](#ProcessInit)食用更佳
+
+- 用户调用createApp，先调用`runtime-dom/index`中的createApp方法
+
+    - 先确保存在渲染器实例，`ensureRenderer`返回了一个渲染器对象，渲染器对象包含`render`、`hydrate`、`createApp`
+        - 对于render：
+            - 参数
+                - `vnode`：这是一个虚拟DOM节点，它是对实际DOM元素的一种抽象表示，包含元素类型、属性、子节点等信息。
+                - `container`：这是DOM容器元素，即将VNode渲染的目标容器。
+                - `namespace`（可选）：在某些情况下，可能需要指定特定的命名空间，特别是在处理SVG或者自定义命名空间元素时。
+            - 过程
+                - 如果传入的`vnode`为空，则检查`container`是否有已存在的关联VNode。如果有，则执行卸载操作（unmount），从DOM中移除已有的相关节点及其子树。
+                - 否则，如果`vnode`非空，则执行patch操作，该操作比较新旧两个VNode（当前容器上的VNode与传入的新VNode），并根据它们之间的差异来最小化地更新DOM，确保DOM结构与最新的VNode状态一致。
+                - 调用预flush和后flush的回调函数队列（`flushPreFlushCbs` 和 `flushPostFlushCbs`），这些函数在DOM更新前后执行，可以用于一些副作用的管理或异步任务调度。
+                - 最后，将当前渲染的VNode赋值给容器的 `_vnode` 属性，以便后续更新时进行比较。
+        - 对于createApp，实际上就是调用了createAppAPI(render)，位于runtime-core的apiCreateApp.ts中，这个createAppAPI最终返回的是一个app对象
+            - 创建了上下文context（通过createAppContext），并且创立了一个插件的容器`installedPlugins`
+            - app对象包含_props（为rootprops）, _component（为rootcomponent），还有 _context（执行上下文）和 _instance（实例）
+            - 也包括use，mixin，component，directive，mount，unmount，provide方法，除了mount和unmount方法，其他返回的都是app对象，因此调用可以是链式调用。且provide是在`context.provides`对象上进行绑定值。PS：provide方法是在`当前实例的provides`上绑定一个键值对
+
+- 然后用户进行挂载使用`app.mount('#app')`这里运行的逻辑是，执行app对象的mount方法（上文提到的app）；
+
+    - 在mount方法中
+
+        - 创建了一个vnode节点（createVNode(rootComponent, rootProps)） rootProps = null。
+
+            - 这个方法调用了createVNode，这里面返回的是，调用createBaseVNode方法，这个方法返回一个vnode对象，其shapeFlag是`ShapeFlags.ELEMENT`
+
+        - 然后将用户调用createApp是生成的context放到vnode上的appContext的。
+
+        - 然后调用render方法，`render(vnode,rootContainer,namespace)`vnode为vnode结点，rootContainer是需要挂载的’字符串‘
+
+        - render方法在`runtime-core/renderer.ts`中
+
+            - render方法调用了patch方法，其传入的n1为null，n2为vnode
+
+            - patch方法中通过重重筛选，最终调用了`processElement`方法。
+
+            - 在processElement方法中，因为n1位null，表示挂载，因此调用mountElement方法。
+
+                - mountElement中将el和vnode.el进行赋值（调用hostCreateElement），为创建的DOM元素
+
+                - 然后设置作用域和ID，setScopeId(el, vnode, vnode.scopeId, slotScopeIds, parentComponent)
+
+                - 然后将创建的元素插入到指定的容器中，并确定相对于锚点(`anchor`)的位置。（hostInsert(el, container, anchor)）初始时锚点为null
+
+                    ```ts
+                    insert: (child, parent, anchor) => {
+                        parent.insertBefore(child, anchor || null)
+                      }
+                    ```
+
+- 然后就是对声明响应式的数据进行处理。这里需要清楚，targetMap是存储着，对象与依赖收集器的关系，依赖收集器存储的是依赖于响应式对象的副作用函数
+
+    - 当访问或修改响应式对象的属性时，Proxy 会记录对该属性的读取（收集依赖）和写入（触发通知）操作。调用reacive方法。
+
+    - get时触发track方法，收集依赖，targetMap是类似于之前的dep存在，存储着，对象——对应的依赖 关系
+
+        - ```ts
+            let depsMap = targetMap.get(target)
+                if (!depsMap) {
+                  targetMap.set(target, (depsMap = new Map()))
+                }
+                let dep = depsMap.get(key)
+                if (!dep) {
+                  depsMap.set(key, (dep = createDep(() => depsMap!.delete(key))))
+                }
+            ```
+
+        - 然后调用trackEffect，确保dep的唯一标识符是最新的，并且更新依赖数量
+
+    - set触发trigger方法，取得当前`target`的对应依赖映射(depsMap，依赖收集器)
+
+        - ```ts
+              const depsMap = targetMap.get(target)
+              let deps: (Dep | undefined)[] = []
+                deps = [...depsMap.values()]
+            ...set
+            deps.push(depsMap.get(ITERATE_KEY))
+            
+            ```
+
+        - 然后遍历deps，然后调用triggerEffect方法，用于触发那些依赖于特定 响应式数据集合的副作用函数
+
+            - ```tsx
+                export function triggerEffects(
+                  dep: Dep,
+                  dirtyLevel: DirtyLevels,
+                  debuggerEventExtraInfo?: DebuggerEventExtraInfo,
+                ) {
+                  pauseScheduling()
+                  for (const effect of dep.keys()) {
+                    if (
+                      effect._dirtyLevel < dirtyLevel &&
+                      dep.get(effect) === effect._trackId
+                    ) {
+                      const lastDirtyLevel = effect._dirtyLevel
+                      effect._dirtyLevel = dirtyLevel
+                      if (lastDirtyLevel === DirtyLevels.NotDirty) {
+                        effect.trigger()
+                      }
+                    }
+                  }
+                  scheduleEffects(dep)
+                  resetScheduling()
+                }
+                ```
+
+            - 然后进行派发更新，实现副作用调度
+
+
+
+​	
