@@ -4766,7 +4766,7 @@ export const nodeOps: Omit<RendererOptions<Node, Element>, 'patchProp'> = {
             ...set
             deps.push(depsMap.get(ITERATE_KEY))
             
-            ```
+          ```
 
         - 然后遍历deps，然后调用triggerEffect方法，用于触发那些依赖于特定 响应式数据集合的副作用函数
 
@@ -4794,7 +4794,73 @@ export const nodeOps: Omit<RendererOptions<Node, Element>, 'patchProp'> = {
                 }
                 ```
 
-            - 然后进行派发更新，实现副作用调度
+            - 然后进行派发更新，实现副作用调度。然后进行patch对比，对比之后进行更新DOM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 杂项
+
+### 指令相关
+
+#### v-if
+
+v-if在编译的时候，会先调用，transformIf，这函数是一个结构化指令转换器工厂函数，它接收一个正则表达式作为匹配指令名称的参数，并返回一个转换函数。当它遇到符合条件的指令就调用processIf函数处理节点。
+
+```ts
+export const transformIf = createStructuralDirectiveTransform(
+  /^(if|else|else-if)$/,
+  (node, dir, context) => {
+    return processIf(node, dir, context, (ifNode, branch, isRoot) => {
+      // #1587: We need to dynamically increment the key based on the current
+      // node's sibling nodes, since chained v-if/else branches are
+      // rendered at the same depth
+      const siblings = context.parent!.children
+      let i = siblings.indexOf(ifNode)
+      let key = 0
+      while (i-- >= 0) {
+        const sibling = siblings[i]
+        if (sibling && sibling.type === NodeTypes.IF) {
+          key += sibling.branches.length
+        }
+      }
+
+      // Exit callback. Complete the codegenNode when all children have been
+      // transformed.
+      return () => {
+        if (isRoot) {
+          ifNode.codegenNode = createCodegenNodeForBranch(
+            branch,
+            key,
+            context,
+          ) as IfConditionalExpression
+        } else {
+          // attach this branch's codegen node to the v-if root.
+          const parentCondition = getParentCondition(ifNode.codegenNode!)
+          parentCondition.alternate = createCodegenNodeForBranch(
+            branch,
+            key + ifNode.branches.length - 1,
+            context,
+          )
+        }
+      }
+    })
+  },
+)
+```
+
+
 
 
 
