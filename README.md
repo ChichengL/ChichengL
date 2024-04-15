@@ -34,3 +34,4 @@
   <source media="(prefers-color-scheme: light)" srcset="./assets/github-snake.svg" />
   <img width="100%" alt="github-snake" src="./assets/github-snake.svg" />
 </picture>
+<img src="https://github-readme-stats.vercel.app/api?username=ChiChengL">
