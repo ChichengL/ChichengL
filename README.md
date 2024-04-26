@@ -40,5 +40,5 @@
   <img width="100%" alt="github-snake" src="./assets/github-snake.svg" />
 </picture>
 <div align="right">
-  <img src="https://github-readme-stats.vercel.app/api?username=ChiChengL">
+
 </div>
