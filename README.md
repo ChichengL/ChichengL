@@ -39,7 +39,7 @@
   <source media="(prefers-color-scheme: light)" srcset="./assets/github-snake.svg" />
   <img width="100%" alt="github-snake" src="./assets/github-snake.svg" />
 </picture>
-<div align="right">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=ChichengL&hide_border=false&include_all_commits=true&count_private=true&layout=compact">
-  <img src="https://github-readme-stats.vercel.app/api?username=ChiChengL">
+<div align="center">
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=ChichengL&hide_border=false&include_all_commits=true&count_private=true&layout=compact" style="width:35%;height:35%">
+  <img src="https://github-readme-stats.vercel.app/api?username=ChiChengL" >
 </div>
