@@ -1,7 +1,8 @@
 <!-- 标题 + 个人描述, emoji 取自: http://emojihomepage.com -->
 <p align="center">
   <h1 height="200px" align="center">
-    ChichengL<img src="https://cdn.jsdelivr.net/gh/MaleWeb/picture/images/techblog/hi.gif" width="25">吃橙不吃陈
+    你好👋朋友
+    我是ChichengL<img src="https://cdn.jsdelivr.net/gh/MaleWeb/picture/images/techblog/hi.gif" width="25">吃橙不吃陈
   </h1>
    <p align="center">✨  对前端感兴趣的一份子  ✨</p>
 </p>
