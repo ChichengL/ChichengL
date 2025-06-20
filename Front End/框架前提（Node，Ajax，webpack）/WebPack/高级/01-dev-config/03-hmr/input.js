@@ -1,1 +1,0 @@
-document.querySelector('#root').innerHTML = '<input type="text" value="test"/>'
