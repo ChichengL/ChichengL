@@ -1,22 +1,27 @@
 <!-- 标题 + 个人描述, emoji 取自: http://emojihomepage.com -->
 <p align="center">
   <h1 height="200px" align="center">
-    你好👋朋友
-    我是ChichengL<img src="https://cdn.jsdelivr.net/gh/MaleWeb/picture/images/techblog/hi.gif" width="25">吃橙不吃陈
+    Hello👋 Myfriends
+    I'm ChichengL<img src="https://cdn.jsdelivr.net/gh/MaleWeb/picture/images/techblog/hi.gif" width="25">
   </h1>
-   <p align="center">✨  对前端感兴趣的一份子  ✨</p>
+   <p align="center">✨  I am a person who is interested in front-end development and also a front-end developer. I am also very curious about the unknown fields   ✨</p>
 </p>
 <p align="center">
   <h2 height="200px" align="center">
-    LEC团队见习前端（2022.10——时间长河的尽头）
+    one of the Fe merbers of the SWPU_Lec team（2022.10——Now）
   </h2>
 </p>
+<p align="center">
+  <h2 height="200px" align="center">
+    my experience
+  </h2>
+  <ul>
+    <li> I was a front-end developer intern in the Customer Service Front-end Team, Risk Control Department, Kuaishou, from 2024.5.28 to 2024.8.12 </li>
+    <li>I was a front-end developer intern in the Creative AI Team,Global Monetization Product and Technology,Bytedance, from 2024.10.21 to 2025.4.3</li>
+    <li>I was a front-end developer intern in the PPM Team,Meego,Bytedance,from 2025.4.7 to now</li>
+  </ul>
+</p>
 
-<!-- 
-  技术栈标签, 小标签来自: https://shields.io/
-  1. shields 链接格式: https://img.shields.io/badge/-{标签文本}-{标签背景色}?style={标签类型}&logo={标签前面 Logo}&logoColor={Logo 颜色}
-  2. shields 可选 Logo 列表参考: https://github.com/simple-icons/simple-icons/blob/develop/slugs.md
--->
 <div align="center">
   <img src="https://img.shields.io/badge/-JavaScript-f6da1c?style=flat&logo=javascript&logoColor=white">
   <img src="https://img.shields.io/badge/-TypeScript-2b6dbf?style=flat&logo=typescript&logoColor=white">
@@ -34,7 +39,6 @@
   <img src="https://img.shields.io/badge/-Webpack-%232C3A42?style=flat-square&logo=webpack">
   <img src="https://img.shields.io/badge/-ESLint-%234B32C3?style=flat-square&logo=eslint">
 </div>
-<!-- 贪吃蛇 - 图片由 actions/Generate Snake 定时生成 -->
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/github-snake-dark.svg" />
   <source media="(prefers-color-scheme: light)" srcset="./assets/github-snake.svg" />
